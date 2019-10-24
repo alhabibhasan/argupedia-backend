@@ -32,15 +32,13 @@ const createArg = (statement) => {
         })
 }
 
-const respondToArg = (argToRespondToId, responderId, support = true) => {
+const respondToArg = (argToRespondToId, responderId, responseType = 'SUPPORT') => {
     // Need to check that a relationship exists between node already before adding a new relationship.
     if (!isInt(argToRespondToId) || !isInt(responderId)) return 'Need integer ID values'
 
-    const responseType = support ? 'SUPPORTS' : 'ATTACKS'
-
     const cypher = `MATCH (argToRespondTo:Argument) WHERE ID(argToRespondTo) = toInteger($argToRespondToId)
                     MATCH (respondingArg:Argument) WHERE ID(respondingArg) = toInteger($responderId)
-                    CREATE (respondingArg)-[r:` + responseType + `]->(argToRespondTo) RETURN respondingArg, r, argToRespondTo
+                    CREATE (respondingArg)-[r:` + responseType.toUpperCase() + `]->(argToRespondTo) RETURN respondingArg, r, argToRespondTo
     `
 
     session.run(cypher, {argToRespondToId: argToRespondToId, responderId: responderId, responseType: responseType})
@@ -56,14 +54,15 @@ const isInt = (value) => {
 }
 
 
+
 // Funct. to create arg
-// createArg('Hello there ' + Math.floor(Math.random() * Math.floor(100))).then(result => {
-//     console.log(result)
+// createArg('Supported by the owners of Deimler Motor Group.').then(result => {
+//     respondToArg(2, result, 'proved')
 // })
 
 
 // Funct. to support args.
-// respondToArg(37, 28, false)
+// respondToArg(2, 54, 'proved')
 
 
 app.listen(port, () => console.log(`App running on port ${port}!`))
