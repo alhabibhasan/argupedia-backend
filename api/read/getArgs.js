@@ -1,4 +1,5 @@
 const neo4j = require('neo4j-driver').v1
+const {getNodeLabels} = require('./labeller')
 const { createArgumentObject,
         arrayContainsArg,
         arrayContainsLink,
@@ -26,6 +27,13 @@ const getRootArgChain = (rootId) => {
     let rootNodePromise = session.run(rootNodeCypher, {rootId: rootId})
 
     return processQueryResponse([rootNodeChainPromise, rootNodePromise], session)
+    .then(nodesWithLinks => {
+        let labelledNodes = getNodeLabels(nodesWithLinks)
+        return {
+            nodesWithLinks,
+            labelledNodes
+        }
+    })
 }
 
 const getLinksBetweenNodes = (argChain) => {
