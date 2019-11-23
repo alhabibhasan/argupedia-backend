@@ -243,12 +243,16 @@ const getNodesWithAttackers = nodesWithLinks => {
 
 
 const getNodeLabels = nodesWithLinks => {
+    
     let nodesWithAttackers = getNodesWithAttackers(nodesWithLinks)
-    console.log(nodesWithAttackers)
     let nodesToMark = JSON.parse(JSON.stringify(nodesWithAttackers)) // create a copy
     let nodeStatusMap = {}
-    markOuterMostNodes(nodesWithAttackers, nodesToMark, nodeStatusMap)
-    markRemainingNodes(nodesToMark, nodeStatusMap)
+    if (nodesWithLinks.links.length > 0) {
+        markOuterMostNodes(nodesWithAttackers, nodesToMark, nodeStatusMap)
+        markRemainingNodes(nodesToMark, nodeStatusMap)
+    } else {
+        nodeStatusMap[nodesWithLinks.nodes[0].id] = IN
+    }
 
     return nodeStatusMap
 }

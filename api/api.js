@@ -13,7 +13,8 @@ router.get('/getArgChain/:id', [validateId, validParams], (req, res, next) => {
     getRootArgChain(req.params.id)
     .then(argChain => {
         res.send({
-            argChain
+            argChain: argChain.nodesWithLinks,
+            labels: argChain.labelledNodes
         })
     })
 })
