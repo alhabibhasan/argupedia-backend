@@ -5,17 +5,36 @@ const driver = neo4j.driver(process.env.NEO_HOST, neo4j.auth.basic(process.env.N
 const session = driver.session()
 
 
-const createArg = (statement) => {
+const createArg = (arg) => {
+    const { statement, circumstance, action, newCircumstance, goal, value, root } = arg
+
     const cypher = `CREATE 
                     (arg:Argument {
-                        statement: $statement
+                        statement: $statement,
+                        circumstance: $circumstance,
+                        action: $action,
+                        newCircumstance: $newCircumstance,
+                        goal: $goal,
+                        value: $value,
+                        root: $root
                     })
                     RETURN ID(arg) as nodeId`
-    return session.run(cypher, {statement: statement})
-        .then(data => {
-            let nodeId = neo4j.integer.toNumber(data.records[0]._fields[0])
-            return nodeId
-        })
+    return session.run(cypher, {
+        statement,
+        circumstance,
+        action,
+        newCircumstance,
+        goal,
+        value,
+        root
+    })
+    .then(data => {
+        let nodeId = neo4j.integer.toNumber(data.records[0]._fields[0])
+        return nodeId
+    })
+    .catch(err => {
+        throw err
+    })
 }
 
 const respondToArg = (argToRespondToId, responderId, responseType = 'ATTACK') => {
@@ -40,7 +59,7 @@ const isInt = (value) => {
 }
 
 
-export default {
+module.exports = {
     createArg,
     respondToArg
 }
