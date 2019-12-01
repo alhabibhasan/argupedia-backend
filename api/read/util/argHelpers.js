@@ -7,14 +7,11 @@ const createArgumentObject = (arg) => {
     }
 
     let id = JSON.stringify(neo4j.integer.toNumber(arg.identity));
-    let statement = arg.properties.statement;
-    let root = arg.properties.root || false
 
-    if (root) return { id, statement, root }
+    let argObj = arg.properties
+    argObj.id = id
 
-    return {
-        id, statement
-    }
+    return argObj
 }
 
 const arrayContainsArg = (arr, arg) => arr.filter(elem => elem.id === arg.id).length > 0
