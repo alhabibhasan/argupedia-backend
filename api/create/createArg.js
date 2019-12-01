@@ -6,7 +6,7 @@ const session = driver.session()
 
 
 const createArg = (arg) => {
-    const { statement, circumstance, action, newCircumstance, goal, value, root } = arg
+    const { statement, circumstance, action, newCircumstance, goal, value, root, sourceList} = arg
 
     const cypher = `CREATE 
                     (arg:Argument {
@@ -16,7 +16,8 @@ const createArg = (arg) => {
                         newCircumstance: $newCircumstance,
                         goal: $goal,
                         value: $value,
-                        root: $root
+                        root: $root,
+                        sourceList: $sourceList
                     })
                     RETURN ID(arg) as nodeId`
     return session.run(cypher, {
@@ -26,7 +27,8 @@ const createArg = (arg) => {
         newCircumstance,
         goal,
         value,
-        root
+        root,
+        sourceList
     })
     .then(data => {
         let nodeId = neo4j.integer.toNumber(data.records[0]._fields[0])
