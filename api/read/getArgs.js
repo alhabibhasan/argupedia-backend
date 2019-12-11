@@ -69,11 +69,13 @@ const formLink = (relationship) => {
     let relationStart = neo4j.integer.toNumber(relationship.start)
     let relationEnd = neo4j.integer.toNumber(relationship.end)
     let relationType = relationship.type
+    let linkedProperty = relationship.properties.respondsToProperty
 
     let link = {
         source: JSON.stringify(relationStart),
         target: JSON.stringify(relationEnd),
-        type: relationType,
+        type: relationType + ' : ' + linkedProperty,
+        
     }
 
     return link;
