@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const {getRootArgChain, getRootArgs} = require('./read/getArgs')
-const {createArg} = require('./create/createArg')
+const {createArg, respondToArg} = require('./create/createArg')
 
 const {check, validationResult} = require('express-validator');
 
@@ -16,7 +16,17 @@ const validateArg = [
     check('newCircumstance').isLength({min: 5}).withMessage('Title must be greater than 5 characters'),
     check('goal').isLength({min: 5}).withMessage('Title must be greater than 5 characters'),
     check('value').isLength({min: 5}).withMessage('Title must be greater than 5 characters'),
+    check('argumentBasis').not().isEmpty().withMessage('Argument basis is required.'),
     check('root').isIn(['true', 'false'])
+]
+
+const validateArgResponse = [
+    check('rootId').isInt({min: 0}).withMessage('ID for root arg must be numeric and > 0'),
+    check('statement').isLength({min: 5}).withMessage('Title must be greater than 5 characters'),
+    check('circumstance').isLength({min: 5}).withMessage('Title must be greater than 5 characters'),
+    check('action').isLength({min: 5}).withMessage('Title must be greater than 5 characters'),
+    check('argumentBasis').not().isEmpty().withMessage('Argument basis is required.'),
+    check('propertyToRespondTo').not().isEmpty().withMessage('Need a property to respond to.'),
 ]
 
 router.get('/getArgChain/:id', [validateId, validParams], (req, res, next) => {
@@ -39,11 +49,33 @@ router.get('/getRootArgs', (req, res, next) => {
 })
 
 router.post('/createArg', [validateArg, validParams], (req, res, next) => {
-    console.log(req.body)
     createArg(req.body)
     .then(nodeId => {
         res.send({
             nodeId
+        })
+    })
+    .catch(err => {
+        res.status(409).send({
+            error: err.code
+        })
+    })
+})
+
+router.post('/:id/createResponse', [validateArgResponse, validParams], (req, res, next) => {
+    createArg(req.body)
+    .then(createdNode => {
+        return createdNode
+    })
+    .then(createdNodeId => {
+        console.log(req.body.id)
+        let originalNodeId = parseInt(req.body.rootId)
+        let attackerId = parseInt(createdNodeId)
+        return respondToArg(originalNodeId, attackerId, 'ATTACK', req.body.propertyToRespondTo)
+    })
+    .then(createdRelationship => {
+        res.send({
+            createdRelationship
         })
     })
     .catch(err => {
