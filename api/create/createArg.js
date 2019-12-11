@@ -6,7 +6,15 @@ const session = driver.session()
 
 
 const createArg = (arg) => {
-    const { statement, circumstance, action, newCircumstance, goal, value, root, sourceList} = arg
+    const { statement, 
+        circumstance, 
+        action, 
+        newCircumstance, 
+        goal, 
+        value, 
+        root, 
+        argumentBasis,
+        sourceList } = arg
 
     const cypher = `CREATE 
                     (arg:Argument {
@@ -17,6 +25,7 @@ const createArg = (arg) => {
                         goal: $goal,
                         value: $value,
                         root: $root,
+                        argumentBasis: $argumentBasis,
                         sourceList: $sourceList
                     })
                     RETURN ID(arg) as nodeId`
@@ -27,6 +36,7 @@ const createArg = (arg) => {
         newCircumstance,
         goal,
         value,
+        argumentBasis,
         root,
         sourceList
     })
@@ -39,16 +49,17 @@ const createArg = (arg) => {
     })
 }
 
-const respondToArg = (argToRespondToId, responderId, responseType = 'ATTACK') => {
+const respondToArg = (argToRespondToId, responderId, responseType = 'ATTACK', respondsToProperty) => {
     // Need to check that a relationship exists between node already before adding a new relationship.
-    if (!isInt(argToRespondToId) || !isInt(responderId)) return 'Need integer ID values'
+    if (!isInt(argToRespondToId) || !isInt(responderId)) throw new Error('Need integer ID values')
 
     const cypher = `MATCH (argToRespondTo:Argument) WHERE ID(argToRespondTo) = toInteger($argToRespondToId)
                     MATCH (respondingArg:Argument) WHERE ID(respondingArg) = toInteger($responderId)
-                    CREATE (respondingArg)-[r:` + responseType.toUpperCase() + `]->(argToRespondTo) RETURN respondingArg, r, argToRespondTo
-    `
+                    CREATE (respondingArg)-[r:` + responseType.toUpperCase() + `]->(argToRespondTo)
+                    SET r.respondsToProperty = $respondsToProperty
+                    RETURN respondingArg, r, argToRespondTo`
 
-    session.run(cypher, {argToRespondToId: argToRespondToId, responderId: responderId, responseType: responseType})
+    session.run(cypher, {argToRespondToId, responderId, responseType, respondsToProperty})
     .then(data => {
         console.log(data.records)
     })
