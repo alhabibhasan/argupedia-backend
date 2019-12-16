@@ -233,9 +233,7 @@ const getNodesWithAttackers = nodesWithLinks => {
         })
 
         return {
-            node: {
-                id: node.id
-            },
+            node: node,
             attackers: attacks
         }
     })
@@ -258,5 +256,6 @@ const getNodeLabels = nodesWithLinks => {
 }
 
 module.exports = {
-    getNodeLabels
+    getNodeLabels,
+    getNodesWithAttackers
 }
