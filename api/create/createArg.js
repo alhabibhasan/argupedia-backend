@@ -1,5 +1,6 @@
 
 const neo4j = require('neo4j-driver').v1
+const {formLink , unwrapResult} = require('../read/util/argHelpers')
 
 const driver = neo4j.driver(process.env.NEO_HOST, neo4j.auth.basic(process.env.NEO_USERNAME, process.env.NEO_PASS))
 const session = driver.session()
@@ -28,7 +29,7 @@ const createArg = (arg) => {
                         argumentBasis: $argumentBasis,
                         sourceList: $sourceList
                     })
-                    RETURN ID(arg) as nodeId`
+                    RETURN arg`
     return session.run(cypher, {
         statement,
         circumstance,
@@ -41,8 +42,10 @@ const createArg = (arg) => {
         sourceList
     })
     .then(data => {
-        let nodeId = neo4j.integer.toNumber(data.records[0]._fields[0])
-        return nodeId
+        let node = unwrapResult(data)[0]
+        let nodeId = neo4j.integer.toNumber(node.identity)
+        node = node.properties
+        return {nodeId,node}
     })
     .catch(err => {
         throw err
@@ -59,9 +62,11 @@ const respondToArg = (argToRespondToId, responderId, responseType = 'ATTACK', re
                     SET r.respondsToProperty = $respondsToProperty
                     RETURN respondingArg, r, argToRespondTo`
 
-    session.run(cypher, {argToRespondToId, responderId, responseType, respondsToProperty})
+    return session.run(cypher, {argToRespondToId, responderId, responseType, respondsToProperty})
     .then(data => {
-        console.log(data.records)
+        let arg = unwrapResult(data)[0]
+        let relationship = formLink(arg[1])
+        return relationship
     })
 }
 
