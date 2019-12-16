@@ -1,9 +1,11 @@
 const neo4j = require('neo4j-driver').v1
-const {getNodeLabels} = require('./labeller')
+const {getNodeLabels, getNodesWithAttackers} = require('./labeller')
+const {getThread} = require('./threader')
 const { createArgumentObject,
         arrayContainsArg,
         arrayContainsLink,
-        unwrapResult } = require('./util/argHelpers')
+        unwrapResult,
+        formLink } = require('./util/argHelpers')
 
 const driver = neo4j.driver(process.env.NEO_HOST, neo4j.auth.basic(process.env.NEO_USERNAME, process.env.NEO_PASS))
 
@@ -18,7 +20,7 @@ const driver = neo4j.driver(process.env.NEO_HOST, neo4j.auth.basic(process.env.N
 const getRootArgChain = (rootId) => {
     const session = driver.session()
 
-    const relationshipsCypher = `MATCH p=(rootArg:Argument{root:true})-[*]-(args:Argument) 
+    const relationshipsCypher = `MATCH p=(rootArg:Argument)<-[*]-(args:Argument) 
                     WHERE ID(rootArg) = toInteger($rootId)
                     RETURN rootArg, RELATIONSHIPS(p) AS relationship, args`
     let rootNodeChainPromise = session.run(relationshipsCypher, {rootId: rootId})
@@ -63,22 +65,6 @@ const getLinksBetweenNodes = (argChain) => {
     return {
         nodes, links
     }
-}
-
-const formLink = (relationship) => {
-    let relationStart = neo4j.integer.toNumber(relationship.start)
-    let relationEnd = neo4j.integer.toNumber(relationship.end)
-    let relationType = relationship.type
-    let linkedProperty = relationship.properties.respondsToProperty
-
-    let link = {
-        source: JSON.stringify(relationStart),
-        target: JSON.stringify(relationEnd),
-        type: relationType + ' : ' + linkedProperty,
-        
-    }
-
-    return link;
 }
 
 /**
@@ -139,7 +125,17 @@ const getNodes = (response, /*optional*/currentListOfNodes) => {
     return nodes
 }
 
+const getThreadForRoot = (rootId) => {
+    return getRootArgChain(rootId)
+    .then(nodes => {
+        let nodesWithLinks = nodes.nodesWithLinks
+        let withAttackers = getNodesWithAttackers(nodesWithLinks)
+        return getThread(rootId, withAttackers)
+    })
+}
+
 module.exports = {
     getRootArgChain,
-    getRootArgs
+    getRootArgs,
+    getThreadForRoot
 }
