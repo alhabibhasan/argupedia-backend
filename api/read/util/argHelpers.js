@@ -26,9 +26,26 @@ const unwrapResult = response => response.records.map(rec => {
     }
 });
 
+const formLink = (relationship) => {
+    let relationStart = neo4j.integer.toNumber(relationship.start)
+    let relationEnd = neo4j.integer.toNumber(relationship.end)
+    let relationType = relationship.type
+    let linkedProperty = relationship.properties.respondsToProperty
+
+    let link = {
+        source: JSON.stringify(relationStart),
+        target: JSON.stringify(relationEnd),
+        type: relationType + ' : ' + linkedProperty,
+        
+    }
+
+    return link;
+}
+
 module.exports = {
     createArgumentObject,
     arrayContainsArg,
     arrayContainsLink,
-    unwrapResult
+    unwrapResult,
+    formLink
 }
