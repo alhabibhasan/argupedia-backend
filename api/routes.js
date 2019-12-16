@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const {getRootArgChain, getRootArgs} = require('./read/getArgs')
+const {getRootArgChain, getRootArgs, getThreadForRoot} = require('./read/getArgs')
 const {createArg, respondToArg} = require('./create/createArg')
 
 const {check, validationResult} = require('express-validator');
@@ -48,6 +48,15 @@ router.get('/getRootArgs', (req, res, next) => {
     })
 })
 
+router.get('/getThread/:id', [validateId, validParams], (req, res, next) => {
+    getThreadForRoot(req.params.id)
+    .then(thread => {
+        res.send({
+            thread
+        })
+    })
+})
+
 router.post('/createArg', [validateArg, validParams], (req, res, next) => {
     createArg(req.body)
     .then(nodeId => {
@@ -63,19 +72,22 @@ router.post('/createArg', [validateArg, validParams], (req, res, next) => {
 })
 
 router.post('/:id/createResponse', [validateArgResponse, validParams], (req, res, next) => {
+    let createdNodeToReturn
     createArg(req.body)
     .then(createdNode => {
+        createdNodeToReturn = createdNode.node
+        createdNodeToReturn.id = createdNode.nodeId
         return createdNode
     })
-    .then(createdNodeId => {
-        console.log(req.body.id)
+    .then(createdNode => {
         let originalNodeId = parseInt(req.body.rootId)
-        let attackerId = parseInt(createdNodeId)
+        let attackerId = parseInt(createdNode.nodeId)
         return respondToArg(originalNodeId, attackerId, 'ATTACK', req.body.propertyToRespondTo)
     })
     .then(createdRelationship => {
         res.send({
-            createdRelationship
+            createdNode: createdNodeToReturn,
+            createdRelationship: createdRelationship
         })
     })
     .catch(err => {
