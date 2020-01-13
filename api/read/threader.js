@@ -163,12 +163,12 @@ const threadify = (rootNode, allNodes) => {
         return rootNode
     } else {
         rootNode.attackers = rootNode.attackers.map(attacker => {
-            let fullNodeValue = allNodes.filter(arg => arg.node.id === attacker.id)
+            let fullNodeValue = allNodes.filter(arg => arg.node.id === attacker.id)[0]
             return fullNodeValue
         })
 
         rootNode.attackers.forEach(attacker => {
-            threadify(attacker[0], allNodes)
+            threadify(attacker, allNodes)
         })
 
         return rootNode
@@ -176,7 +176,6 @@ const threadify = (rootNode, allNodes) => {
 }
 
 const getThread = (nodeId, allNodes) => {
-    console.log(allNodes)
     let rootNode = allNodes.filter(arg => arg.node.id == nodeId)[0]
     if (!rootNode) return 'THREAD CREATION ERROR: Root node with ID: ' + nodeId + ' not found.'
     return threadify(rootNode, allNodes)
