@@ -21,7 +21,7 @@ const validateArg = [
 ]
 
 const validateArgResponse = [
-    check('rootId').isInt({min: 0}).withMessage('ID for root arg must be numeric and > 0'),
+    check('parentId').isInt({min: 0}).withMessage('ID for root arg must be numeric and > 0'),
     check('statement').isLength({min: 5}).withMessage('Title must be greater than 5 characters'),
     check('circumstance').isLength({min: 5}).withMessage('Title must be greater than 5 characters'),
     check('action').isLength({min: 5}).withMessage('Title must be greater than 5 characters'),
@@ -58,13 +58,17 @@ router.get('/getThread/:id', [validateId, validParams], (req, res, next) => {
 })
 
 router.post('/createArg', [validateArg, validParams], (req, res, next) => {
+    let createdNodeToReturn
     createArg(req.body)
-    .then(nodeId => {
+    .then(createdNode => {
+        createdNodeToReturn = createdNode.node
+        createdNodeToReturn.id = createdNode.nodeId
         res.send({
-            nodeId
+            createdNode: createdNodeToReturn
         })
     })
     .catch(err => {
+        console.log(err)
         res.status(409).send({
             error: err.code
         })
@@ -80,7 +84,7 @@ router.post('/:id/createResponse', [validateArgResponse, validParams], (req, res
         return createdNode
     })
     .then(createdNode => {
-        let originalNodeId = parseInt(req.body.rootId)
+        let originalNodeId = parseInt(req.body.parentId)
         let attackerId = parseInt(createdNode.nodeId)
         return respondToArg(originalNodeId, attackerId, 'ATTACK', req.body.propertyToRespondTo)
     })
@@ -91,6 +95,7 @@ router.post('/:id/createResponse', [validateArgResponse, validParams], (req, res
         })
     })
     .catch(err => {
+        console.log(err)
         res.status(409).send({
             error: err.code
         })

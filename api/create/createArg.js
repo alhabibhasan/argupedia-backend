@@ -7,7 +7,7 @@ const session = driver.session()
 
 
 const createArg = (arg) => {
-    const { statement, 
+    let { statement, 
         circumstance, 
         action, 
         newCircumstance, 
@@ -15,7 +15,12 @@ const createArg = (arg) => {
         value, 
         root, 
         argumentBasis,
-        sourceList } = arg
+        sourceList,
+        parentId } = arg
+    
+    if (root) { 
+        parentId = -1
+    }
 
     const cypher = `CREATE 
                     (arg:Argument {
@@ -26,6 +31,7 @@ const createArg = (arg) => {
                         goal: $goal,
                         value: $value,
                         root: $root,
+                        parentId: $parentId,
                         argumentBasis: $argumentBasis,
                         sourceList: $sourceList
                     })
@@ -39,6 +45,7 @@ const createArg = (arg) => {
         value,
         argumentBasis,
         root,
+        parentId,
         sourceList
     })
     .then(data => {
@@ -48,13 +55,17 @@ const createArg = (arg) => {
         return {nodeId,node}
     })
     .catch(err => {
+        console.log(err, arg)
         throw err
     })
 }
 
 const respondToArg = (argToRespondToId, responderId, responseType = 'ATTACK', respondsToProperty) => {
     // Need to check that a relationship exists between node already before adding a new relationship.
-    if (!isInt(argToRespondToId) || !isInt(responderId)) throw new Error('Need integer ID values')
+    if (!isInt(argToRespondToId) || !isInt(responderId)) {
+        console.log('ERROR: RespondToArg. Need integer ID values')
+        throw new Error('Need integer ID values')
+    }
 
     const cypher = `MATCH (argToRespondTo:Argument) WHERE ID(argToRespondTo) = toInteger($argToRespondToId)
                     MATCH (respondingArg:Argument) WHERE ID(respondingArg) = toInteger($responderId)
