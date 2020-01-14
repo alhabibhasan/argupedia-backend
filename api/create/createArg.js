@@ -22,6 +22,9 @@ const createArg = (arg) => {
         parentId = -1
     }
 
+    let createdAt = new Date().toString(),
+        updatedAt = new Date().toString()
+
     const cypher = `CREATE 
                     (arg:Argument {
                         statement: $statement,
@@ -33,7 +36,9 @@ const createArg = (arg) => {
                         root: $root,
                         parentId: $parentId,
                         argumentBasis: $argumentBasis,
-                        sourceList: $sourceList
+                        sourceList: $sourceList,
+                        createdAt: $createdAt,
+                        updatedAt: $updatedAt
                     })
                     RETURN arg`
     return session.run(cypher, {
@@ -46,7 +51,9 @@ const createArg = (arg) => {
         argumentBasis,
         root,
         parentId,
-        sourceList
+        sourceList,
+        createdAt,
+        updatedAt
     })
     .then(data => {
         let node = unwrapResult(data)[0]
