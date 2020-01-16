@@ -1,8 +1,8 @@
 const express = require('express')
 const router = express.Router()
-const {createArg, respondToArg} = require('../create/createArg')
+const {createArg, respondToArg} = require('./createArg')
 const {check} = require('express-validator');
-const validParams = require('../util/validate-params')
+const validParams = require('../../util/validate-argument')
 
 const validateArg = [
     check('statement').isLength({min: 5}).withMessage('Title must be greater than 5 characters'),

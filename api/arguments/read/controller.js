@@ -3,7 +3,7 @@ const router = express.Router()
 const {getRootArgChain, getRootArgs, getThreadForRoot} = require('./getArgs')
 
 const {check} = require('express-validator');
-const validParams = require('../util/validate-params')
+const validParams = require('../../util/validate-argument')
 
 const validateId = [
     check('id').isNumeric({no_symbols: true}).withMessage('arg id must be a whole number')
