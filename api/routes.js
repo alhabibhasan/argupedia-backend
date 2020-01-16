@@ -1,10 +1,14 @@
 const express = require('express')
 const router = express.Router()
 
-const createController = require('./create/controller')
-const readController = require('./read/controller')
+const createArgController = require('./arguments/create/controller')
+const readArgController = require('./arguments/read/controller')
 
-router.use('/create', createController)
-router.use('/read', readController)
+const userController = require('./users/controller')
+
+router.use('/arg/create', createArgController)
+router.use('/arg/read', readArgController)
+
+router.use('/user', userController)
 
 module.exports = router
