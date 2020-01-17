@@ -62,7 +62,6 @@ const createArg = (arg) => {
         return {nodeId,node}
     })
     .catch(err => {
-        console.log(err, arg)
         throw err
     })
 }
@@ -86,6 +85,9 @@ const respondToArg = (argToRespondToId, responderId, responseType = 'ATTACK', re
         let relationship = formLink(arg[1])
         return relationship
     })
+    .catch(err => {
+        throw err
+    }) 
 }
 
 const isInt = (value) => {

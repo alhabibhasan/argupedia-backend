@@ -2,8 +2,11 @@
 const neo4j = require('neo4j-driver').v1
 const driver = neo4j.driver(process.env.NEO_HOST, neo4j.auth.basic(process.env.NEO_USERNAME, process.env.NEO_PASS))
 const session = driver.session()
+const {unwrapResult} = require('../arguments/read/util/argHelpers')
 
 const createUser = (user) => {
+    if (!user.uid || !user.email) return Promise.reject('ERROR: must provide a user uid and email')
+
     let {
         uid,
         email
@@ -12,9 +15,7 @@ const createUser = (user) => {
     let createdAt = new Date().toString(),
         updatedAt = new Date().toString()
 
-    console.log('hello ' + JSON.stringify(user))
-
-    const cypher = `CREATE 
+    const cypherToCreateUser = `CREATE 
         (usr:User {
             uid: $uid,
             email: $email,
@@ -22,21 +23,47 @@ const createUser = (user) => {
             updatedAt: $updatedAt
         })
         RETURN usr`
-    return session.run(cypher, {uid,email,createdAt,updatedAt})
-    .then(user => {
-        // let node = unwrapResult(data)[0]
-        // let nodeId = neo4j.integer.toNumber(node.identity)
-        // node = node.properties
-        // return {nodeId,node}
-        console.log(user)
-        return user
+
+    return checkIfUserExists(uid).then(check => {
+        if (check.err) return chech.err
+        if (check.userExists) {
+            return {
+                'err' : 'User with uid ' + uid + ' already exists.'
+            }
+        } else if (!check.userExists) {
+            return session.run(cypherToCreateUser, {uid,email,createdAt,updatedAt})
+            .then(userResponse => {
+                let user = unwrapResult(userResponse)[0]
+                let userToReturn = {
+                    nodeId: neo4j.integer.toNumber(user.identity),
+                    uid: user.properties.uid,
+                    email: user.properties.email
+                }
+                return userToReturn
+            })
+            .catch(err => {
+                throw err
+            })
+        }
     })
-    .catch(err => {
-        console.log(err)
+}
+
+const checkIfUserExists = (userId) => {
+    if (!userId || !userId.length) return Promise.reject({err: 'ERROR: UID must not be empty or null.'})
+    const cypher = `MATCH (user:User) 
+                    WHERE user.uid = $userId 
+                    RETURN COUNT(user)`
+    return session.run(cypher, {userId})
+    .then(response => {
+        let userExists = unwrapResult(response)[0]
+        let count = neo4j.integer.toNumber(userExists)
+        return count > 0
+    }).catch(err => {
         throw err
     })
 }
 
 module.exports = {
-    createUser
+    createUser,
+    checkIfUserExists
 }

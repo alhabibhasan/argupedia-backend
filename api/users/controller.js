@@ -1,13 +1,43 @@
 const express = require('express')
 const router = express.Router()
 
-const {createUser} =  require('./users')
+const {createUser, checkIfUserExists} =  require('./users')
+const {check} = require('express-validator');
+const validParams = require('../util/validate-argument')
 
-router.post('/create', (req, res) => {
-    console.log(req.body)
+const validateEmail = [
+    check('email')
+        .isEmail().withMessage('Need to supply an email in the correct format')
+]
+
+const validateUid = [
+    check('uid')
+        .isString().withMessage('UID must be a string.')
+        .isLength({min:5}).withMessage('UID is too short')
+]
+
+router.post('/create', [validateEmail, validateUid, validParams] ,(req, res) => {
     createUser(req.body).then((data) => {
         res.send({
             data: JSON.stringify(data)
+        })
+    })
+    .catch(err => {
+        res.statusCode = 400
+        res.send({
+            error: err
+        })
+    })
+})
+
+router.post('/check', [validateUid, validParams], (req, res) => {
+    checkIfUserExists(req.body.uid).then(response => {
+        res.send({'userExists': response})
+    })
+    .catch(err => {
+        res.statusCode = 400
+        res.send({
+            error: err
         })
     })
 })
