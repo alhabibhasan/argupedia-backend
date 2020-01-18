@@ -241,7 +241,6 @@ const getNodesWithAttackers = nodesWithLinks => {
 
 
 const getNodeLabels = nodesWithLinks => {
-    
     let nodesWithAttackers = getNodesWithAttackers(nodesWithLinks)
     let nodesToMark = JSON.parse(JSON.stringify(nodesWithAttackers)) // create a copy
     let nodeStatusMap = {}
@@ -251,7 +250,6 @@ const getNodeLabels = nodesWithLinks => {
     } else {
         nodeStatusMap[nodesWithLinks.nodes[0].id] = IN
     }
-
     return nodeStatusMap
 }
 

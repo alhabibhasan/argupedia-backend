@@ -31,7 +31,6 @@ const getRootArgChain = (rootId) => {
     return processQueryResponse([rootNodeChainPromise, rootNodePromise], session)
     .then(nodesWithLinks => {
         let labels = getNodeLabels(nodesWithLinks)
-
         nodesWithLinks.nodes.map(node => {
             let label = labels[node.id]
             node['status'] = label
