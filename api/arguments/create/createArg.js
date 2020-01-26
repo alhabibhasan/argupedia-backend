@@ -3,8 +3,6 @@ const neo4j = require('neo4j-driver').v1
 const {formLink , unwrapResult} = require('../read/util/argHelpers')
 
 const driver = neo4j.driver(process.env.NEO_HOST, neo4j.auth.basic(process.env.NEO_USERNAME, process.env.NEO_PASS))
-const session = driver.session()
-
 
 const createArg = (arg) => {
     let { statement, 
@@ -41,6 +39,7 @@ const createArg = (arg) => {
                         updatedAt: $updatedAt
                     })
                     RETURN arg`
+    const session = driver.session()
     return session.run(cypher, {
         statement,
         circumstance,
@@ -56,6 +55,7 @@ const createArg = (arg) => {
         updatedAt
     })
     .then(data => {
+        session.close()
         let node = unwrapResult(data)[0]
         let nodeId = neo4j.integer.toNumber(node.identity)
         node = node.properties
@@ -78,9 +78,10 @@ const respondToArg = (argToRespondToId, responderId, responseType = 'ATTACK', re
                     CREATE (respondingArg)-[r:` + responseType.toUpperCase() + `]->(argToRespondTo)
                     SET r.respondsToProperty = $respondsToProperty
                     RETURN respondingArg, r, argToRespondTo`
-
+    const session = driver.session()
     return session.run(cypher, {argToRespondToId, responderId, responseType, respondsToProperty})
     .then(data => {
+        session.close()
         let arg = unwrapResult(data)[0]
         let relationship = formLink(arg[1])
         return relationship
