@@ -42,5 +42,6 @@ const getDeletedArg = () => {
 }
 
 module.exports = {
-    deleteArg
+    deleteArg,
+    isDeleted
 }
