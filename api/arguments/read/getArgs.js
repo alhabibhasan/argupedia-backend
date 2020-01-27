@@ -25,7 +25,9 @@ const getRootArgChain = (rootId) => {
                     RETURN rootArg, RELATIONSHIPS(p) AS relationship, args`
     let rootNodeChainPromise = session.run(relationshipsCypher, {rootId: rootId})
 
-    const rootNodeCypher = `MATCH (root:Argument) WHERE ID(root) = toInteger($rootId) RETURN root`
+    const rootNodeCypher = `MATCH (root:Argument) 
+                            WHERE ID(root) = toInteger($rootId)
+                            RETURN root`
     let rootNodePromise = session.run(rootNodeCypher, {rootId: rootId})
 
     return processQueryResponse([rootNodeChainPromise, rootNodePromise], session)
@@ -44,7 +46,6 @@ const getRootArgChain = (rootId) => {
 
 const getLinksBetweenNodes = (argChain) => {
     let unwrappedChain = unwrapResult(argChain);
-        
     let nodes = [];
     let links = [];
 
@@ -81,11 +82,12 @@ const getLinksBetweenNodes = (argChain) => {
 const getRootArgs = () => {
     const session = driver.session()
 
-    const linkedRootCypher = `MATCH p=(rootArg:Argument{root:true})-[r]-(args:Argument{root: true}) 
+    const linkedRootCypher = `MATCH p=(rootArg:Argument{root:true})-[r]-(args:Argument{root: true})
+                              WHERE rootArg.deleted <> true 
                               RETURN DISTINCT rootArg, RELATIONSHIPS(p) AS relationship, args`
     let linkedRootNodeChainPromise = session.run(linkedRootCypher)
 
-    const unlinkedRootCyper = `MATCH (arg:Argument{root: true}) RETURN arg`
+    const unlinkedRootCyper = `MATCH (arg:Argument{root: true}) WHERE arg.deleted <> true RETURN arg`
     let unlinkedRootPromise = session.run(unlinkedRootCyper)
 
     return processQueryResponse([linkedRootNodeChainPromise, unlinkedRootPromise], session)
@@ -94,6 +96,8 @@ const getRootArgs = () => {
 /**
  * Given an array of promises, this function will wait for all argument related promises to be resolved. It will then carry out any
  * necessary processing to derive a list of nodes and a list of links between the nodes.
+ * 
+ * The arg promises should be passed in as the unchained nodes first then the chained nodes
  * 
  * @param {[Promises]} argPromises Array of promises.
  * @param {*} session The session to the neo4j instance to be closed after the promises are resolved.
