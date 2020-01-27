@@ -14,7 +14,8 @@ const createArg = (arg) => {
         root, 
         argumentBasis,
         sourceList,
-        parentId } = arg
+        parentId,
+        uid } = arg
     
     if (root) { 
         parentId = -1
@@ -38,7 +39,8 @@ const createArg = (arg) => {
                         sourceList: $sourceList,
                         createdAt: $createdAt,
                         updatedAt: $updatedAt,
-                        deleted: $deleted
+                        deleted: $deleted,
+                        creatorUID: $uid
                     })
                     RETURN arg`
     const session = driver.session()
@@ -55,7 +57,8 @@ const createArg = (arg) => {
         sourceList,
         createdAt,
         updatedAt,
-        deleted
+        deleted,
+        uid
     })
     .then(data => {
         session.close()
