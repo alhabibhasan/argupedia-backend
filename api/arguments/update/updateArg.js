@@ -3,7 +3,7 @@ const driver = neo4j.driver(process.env.NEO_HOST, neo4j.auth.basic(process.env.N
 const {unwrapResult} = require('../read/util/argHelpers')
 const {isDeleted } = require('../util')
 
-let EXCLUDED_PROPS = ['root']
+let EXCLUDED_PROPS = ['root', 'parentId']
 let EXTRA_PROPS = ['updatedAt', 'deleted']
 
 /**
@@ -45,6 +45,7 @@ const updateArg = (id, argValues, deleted = false) => {
             return node.properties
         })
         .catch(err => {
+            console.log(err)
             throw err
         })
     })
