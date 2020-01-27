@@ -22,6 +22,7 @@ const createArg = (arg) => {
 
     let createdAt = new Date().toString(),
         updatedAt = new Date().toString()
+    let deleted = false
 
     const cypher = `CREATE 
                     (arg:Argument {
@@ -36,7 +37,8 @@ const createArg = (arg) => {
                         argumentBasis: $argumentBasis,
                         sourceList: $sourceList,
                         createdAt: $createdAt,
-                        updatedAt: $updatedAt
+                        updatedAt: $updatedAt,
+                        deleted: $deleted
                     })
                     RETURN arg`
     const session = driver.session()
@@ -52,7 +54,8 @@ const createArg = (arg) => {
         parentId,
         sourceList,
         createdAt,
-        updatedAt
+        updatedAt,
+        deleted
     })
     .then(data => {
         session.close()
