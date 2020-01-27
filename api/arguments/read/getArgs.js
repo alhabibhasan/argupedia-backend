@@ -30,7 +30,7 @@ const getRootArgChain = (rootId) => {
                             RETURN root`
     let rootNodePromise = session.run(rootNodeCypher, {rootId: rootId})
 
-    return processQueryResponse([rootNodeChainPromise, rootNodePromise], session)
+    return processLinkedResponse([rootNodePromise, rootNodeChainPromise], session)
     .then(nodesWithLinks => {
         let labels = getNodeLabels(nodesWithLinks)
         nodesWithLinks.nodes.map(node => {
@@ -90,7 +90,7 @@ const getRootArgs = () => {
     const unlinkedRootCyper = `MATCH (arg:Argument{root: true}) WHERE arg.deleted <> true RETURN arg`
     let unlinkedRootPromise = session.run(unlinkedRootCyper)
 
-    return processQueryResponse([linkedRootNodeChainPromise, unlinkedRootPromise], session)
+    return processLinkedResponse([unlinkedRootPromise, linkedRootNodeChainPromise], session)
 }
 
 /**
@@ -102,13 +102,13 @@ const getRootArgs = () => {
  * @param {[Promises]} argPromises Array of promises.
  * @param {*} session The session to the neo4j instance to be closed after the promises are resolved.
  */
-const processQueryResponse = (argPromises, session) => {
+const processLinkedResponse = (argPromises, session) => {
     return Promise.all(argPromises)
     .then(arrayOfResults => {
         session.close()
 
-        let linkedRoots = arrayOfResults[0] || []
-        let unlinkedRoots = arrayOfResults[1] || []
+        let unlinkedRoots = arrayOfResults[0] || []
+        let linkedRoots = arrayOfResults[1] || []
         let { nodes, links } = getLinksBetweenNodes(linkedRoots)
         nodes = getNodes(unlinkedRoots, nodes) // get unlinked roots and add to list of nodes.
 
