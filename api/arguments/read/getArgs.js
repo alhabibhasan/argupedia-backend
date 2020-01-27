@@ -22,12 +22,12 @@ const getRootArgChain = (rootId) => {
 
     const relationshipsCypher = `MATCH p=(rootArg:Argument)<-[*]-(args:Argument) 
                     WHERE ID(rootArg) = toInteger($rootId)
-                    RETURN rootArg, RELATIONSHIPS(p) AS relationship, args`
+                    RETURN rootArg{.*, id: ID(rootArg)}, RELATIONSHIPS(p) AS relationship, args{.*, id: ID(args)}`
     let rootNodeChainPromise = session.run(relationshipsCypher, {rootId: rootId})
 
     const rootNodeCypher = `MATCH (root:Argument) 
                             WHERE ID(root) = toInteger($rootId)
-                            RETURN root`
+                            RETURN root {.*, id: ID(root)}`
     let rootNodePromise = session.run(rootNodeCypher, {rootId: rootId})
 
     return processLinkedResponse([rootNodePromise, rootNodeChainPromise], session)
@@ -50,7 +50,6 @@ const getLinksBetweenNodes = (argChain) => {
     let links = [];
 
     if (unwrappedChain.length > 0) {
-
         unwrappedChain.forEach(argument => {
             let arg1 = createArgumentObject(argument[0])
             let arg2 = createArgumentObject(argument[2])
@@ -87,7 +86,13 @@ const getRootArgs = () => {
                               RETURN DISTINCT rootArg, RELATIONSHIPS(p) AS relationship, args`
     let linkedRootNodeChainPromise = session.run(linkedRootCypher)
 
-    const unlinkedRootCyper = `MATCH (arg:Argument{root: true}) WHERE arg.deleted <> true RETURN arg`
+    const unlinkedRootCyper = `MATCH (arg:Argument{root: true}) 
+                               WHERE arg.deleted <> true 
+                               MATCH (user:User) 
+                               WHERE arg.creatorUID = user.uid
+                               WITH arg, user.displayName as userDisplayName, ID(arg) as id
+                               RETURN arg {.*, userDisplayName: userDisplayName, id: id} as arg`
+
     let unlinkedRootPromise = session.run(unlinkedRootCyper)
 
     return processLinkedResponse([unlinkedRootPromise, linkedRootNodeChainPromise], session)
@@ -106,7 +111,7 @@ const processLinkedResponse = (argPromises, session) => {
     return Promise.all(argPromises)
     .then(arrayOfResults => {
         session.close()
-
+        
         let unlinkedRoots = arrayOfResults[0] || []
         let linkedRoots = arrayOfResults[1] || []
         let { nodes, links } = getLinksBetweenNodes(linkedRoots)

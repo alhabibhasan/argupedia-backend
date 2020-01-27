@@ -5,10 +5,9 @@ const createArgumentObject = (arg) => {
         id: -1,
         statement: '(Error) Invalid arg provided during arg Parse'
     }
+    let id = JSON.stringify(neo4j.integer.toNumber(arg.id));
 
-    let id = JSON.stringify(neo4j.integer.toNumber(arg.identity));
-
-    let argObj = arg.properties
+    let argObj = arg
     argObj.id = id
 
     return argObj
