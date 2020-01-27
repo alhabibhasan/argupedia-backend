@@ -40,7 +40,6 @@ const validateId = [
 
 module.exports = {
     validateArg,
-    validateUid,
     validateArgResponse,
     validateId
 }

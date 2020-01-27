@@ -3,6 +3,7 @@ const router = express.Router()
 
 const {createUser, checkIfUserExists} =  require('./users')
 const {validateUid, validateEmail, validateDisplayName} = require('./validation')
+const validParams = require('../util/validate-argument')
 
 router.post('/create', [validateEmail, validateDisplayName, validateUid, validParams] ,(req, res) => {
     createUser(req.body).then((data) => {

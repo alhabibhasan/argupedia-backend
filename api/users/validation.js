@@ -1,5 +1,4 @@
 const {check} = require('express-validator');
-const validParams = require('../util/validate-argument')
 
 const validateEmail = [
     check('email')
