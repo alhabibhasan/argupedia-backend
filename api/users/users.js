@@ -9,7 +9,8 @@ const createUser = (user) => {
 
     let {
         uid,
-        email
+        email,
+        displayName
     } = user
 
     let createdAt = new Date().toString(),
@@ -19,6 +20,7 @@ const createUser = (user) => {
         (usr:User {
             uid: $uid,
             email: $email,
+            displayName: $displayName,
             createdAt: $createdAt,
             updatedAt: $updatedAt
         })
@@ -31,13 +33,14 @@ const createUser = (user) => {
                 'err' : 'User with uid ' + uid + ' already exists.'
             }
         } else if (!check.userExists) {
-            return session.run(cypherToCreateUser, {uid,email,createdAt,updatedAt})
+            return session.run(cypherToCreateUser, {uid,email, displayName, createdAt,updatedAt})
             .then(userResponse => {
                 let user = unwrapResult(userResponse)[0]
                 let userToReturn = {
                     nodeId: neo4j.integer.toNumber(user.identity),
                     uid: user.properties.uid,
-                    email: user.properties.email
+                    email: user.properties.email,
+                    displayName: user.properties.displayName
                 }
                 return userToReturn
             })
