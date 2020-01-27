@@ -2,7 +2,8 @@ const express = require('express')
 const router = express.Router()
 const {createArg, respondToArg} = require('./createArg')
 const validParams = require('../../util/validate-argument')
-const {validateArg,validateUid ,validateArgResponse} = require('../validation')
+const {validateArg ,validateArgResponse} = require('../validation')
+const {validateUid} = require('../../users/validation')
 
 router.post('/arg', [validateArg, validateUid ,validParams], (req, res, next) => {
     let createdNodeToReturn

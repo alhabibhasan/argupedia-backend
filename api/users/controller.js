@@ -2,25 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const {createUser, checkIfUserExists} =  require('./users')
-const {check} = require('express-validator');
-const validParams = require('../util/validate-argument')
-
-const validateEmail = [
-    check('email')
-        .isEmail().withMessage('Need to supply an email in the correct format')
-]
-
-const validateDisplayName = [
-    check('displayName')
-        .not().isEmpty().withMessage('Need to supply display name.')
-        .isString().withMessage('Display name must be a string.')
-]
-
-const validateUid = [
-    check('uid')
-        .isString().withMessage('UID must be a string.')
-        .isLength({min:5}).withMessage('UID is too short')
-]
+const {validateUid, validateEmail, validateDisplayName} = require('./validation')
 
 router.post('/create', [validateEmail, validateDisplayName, validateUid, validParams] ,(req, res) => {
     createUser(req.body).then((data) => {

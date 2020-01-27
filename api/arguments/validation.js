@@ -23,12 +23,6 @@ const validateArg = [
     check('root').isIn(['true', 'false'])
 ]
 
-const validateUid = [
-    check('uid')
-        .isString().withMessage('User UID must be a string')
-        .not().isEmpty().withMessage('User UID is required')
-]
-
 const validateArgResponse = [
     check('parentId')
         .not().isEmpty().withMessage('Parent ID is a required field')
