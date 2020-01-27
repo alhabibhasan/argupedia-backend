@@ -23,14 +23,20 @@ const validateArg = [
     check('root').isIn(['true', 'false'])
 ]
 
-const validateArgResponse = validateArg.concat([
+const validateUid = [
+    check('uid')
+        .isString().withMessage('User UID must be a string')
+        .not().isEmpty().withMessage('User UID is required')
+]
+
+const validateArgResponse = [
     check('parentId')
         .not().isEmpty().withMessage('Parent ID is a required field')
         .isInt({min: 0}).withMessage('ID for root arg must be numeric and > 0'),
     check('propertyToRespondTo')
         .isString().withMessage('Needs to be a string')
         .not().isEmpty().withMessage('Need a property to respond to.'),
-])
+]
 
 const validateId = [
     check('id')
@@ -40,6 +46,7 @@ const validateId = [
 
 module.exports = {
     validateArg,
+    validateUid,
     validateArgResponse,
     validateId
 }

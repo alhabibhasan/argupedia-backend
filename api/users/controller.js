@@ -10,13 +10,19 @@ const validateEmail = [
         .isEmail().withMessage('Need to supply an email in the correct format')
 ]
 
+const validateDisplayName = [
+    check('displayName')
+        .not().isEmpty().withMessage('Need to supply display name.')
+        .isString().withMessage('Display name must be a string.')
+]
+
 const validateUid = [
     check('uid')
         .isString().withMessage('UID must be a string.')
         .isLength({min:5}).withMessage('UID is too short')
 ]
 
-router.post('/create', [validateEmail, validateUid, validParams] ,(req, res) => {
+router.post('/create', [validateEmail, validateDisplayName, validateUid, validParams] ,(req, res) => {
     createUser(req.body).then((data) => {
         res.send({
             data: JSON.stringify(data)
