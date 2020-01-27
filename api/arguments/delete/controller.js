@@ -12,10 +12,10 @@ router.delete('/:id', [validateId, validParams], (req, res) => {
         })
     })
     .catch((err) => {
-        res.statusCode = 400
+        res.statusCode = 422
         res.send({
             deleted: false,
-            err
+            msg: err
         })
     })
 })

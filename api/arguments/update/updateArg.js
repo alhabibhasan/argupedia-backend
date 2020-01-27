@@ -1,11 +1,17 @@
 const neo4j = require('neo4j-driver').v1
 const driver = neo4j.driver(process.env.NEO_HOST, neo4j.auth.basic(process.env.NEO_USERNAME, process.env.NEO_PASS))
 const {unwrapResult} = require('../read/util/argHelpers')
-const {isDeleted } = require('../delete/deleteArg')
+const {isDeleted } = require('../util')
 
 let EXCLUDED_PROPS = ['root']
 let EXTRA_PROPS = ['updatedAt', 'deleted']
 
+/**
+ * 
+ * @param {*} id The ID of the argument to update 
+ * @param {*} argValues The new argument values
+ * @param {*} deleted Is the value being deleted, false by default.
+ */
 const updateArg = (id, argValues, deleted = false) => {
     const session = driver.session()
     let setStatements = createSetStatements(Object.keys(argValues))
@@ -17,9 +23,10 @@ const updateArg = (id, argValues, deleted = false) => {
 
     return isDeleted(id, session).then(response => {
         session.close()
-        let alreadyDeleted = unwrapResult(response)[0]
-        if (alreadyDeleted === true) {
-            return Promise.reject('Arg has been deleted or does not exist.')
+        let isAlreadyDeleted = unwrapResult(response)[0]
+        if (isAlreadyDeleted === true) {
+            let msg = 'Arg has been deleted or does not exist.'
+            return Promise.reject(msg)
         }
 
         let updateCypher = `MATCH (arg:Argument) 
