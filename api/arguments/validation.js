@@ -27,9 +27,9 @@ const validateArgResponse = [
     check('parentId')
         .not().isEmpty().withMessage('Parent ID is a required field')
         .isInt({min: 0}).withMessage('ID for root arg must be numeric and > 0'),
-    check('propertyToRespondTo')
+    check('statement')
         .isString().withMessage('Needs to be a string')
-        .not().isEmpty().withMessage('Need a property to respond to.'),
+        .isLength({min: 5}).withMessage('Title must be greater than 5 characters'),
 ]
 
 const validateId = [

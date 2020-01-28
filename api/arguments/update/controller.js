@@ -1,10 +1,24 @@
 const express = require('express')
 const router = express.Router()
 const validParams = require('../../util/validate-argument')
-const {validateArg, validateId} = require('../validation')
+const {validateArg, validateArgResponse, validateId} = require('../validation')
 const {updateArg} = require('./updateArg')
 
+/**
+ * This endpoint is used for 'root' arguments.
+ */
 router.patch('/:id', [validateId, validateArg, validParams], (req, res, next) => {
+    updateArgument(req, res)
+})
+
+/**
+ * End point used to edit responses to arguments.
+ */
+router.patch('/response/:id', [validateId, validateArgResponse, validParams], (req, res, next) => {
+    updateArgument(req, res)
+})
+
+const updateArgument = (req, res) => {
     updateArg(req.params.id, req.body)
     .then(updatedNode => {
         res.send({
@@ -16,7 +30,7 @@ router.patch('/:id', [validateId, validateArg, validParams], (req, res, next) =>
         res.send({
             err
         })
-    })
-})
+    }) 
+}
 
 module.exports = router
