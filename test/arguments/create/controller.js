@@ -40,7 +40,7 @@ describe('Arguments', () => {
     })
 
     describe('/POST', () => {
-        it('it should create a new argument', (done) => {
+        it('should create a new argument', (done) => {
           chai.request(server)
               .post('/api/arg/create/arg')
               .send(testArg)
@@ -59,7 +59,7 @@ describe('Arguments', () => {
               });
         });
 
-        it('it should create a new response to an argument', (done) => {
+          it('should create a new response to an argument', (done) => {
             chai.request(server)
                 .post('/api/arg/create/arg')
                 .send(testArg)
@@ -68,16 +68,58 @@ describe('Arguments', () => {
                         let createdObjectId = res.body.createdNode.id
                         let responseArg = JSON.parse(JSON.stringify(testArg))
                         responseArg.parentId = createdObjectId
-                        responseArg.respondsToProperty = 'This is a unit test'
                         
                         chai.request(server)
-                        .post('/api/arg/create/response/' + createdObjectId)
-                        .send(responseArg)
-                        .end((err, res) => {
-                            assert.notEqual(res.body.id,'null')
-                            done()
-                        })
+                            .post('/api/arg/create/response/' + createdObjectId)
+                            .send(responseArg)
+                            .end((err, res) => {
+                                assert.notEqual(res.body.id,'null')
+                                done()
+                            })
                 });
           });
+
+          it('should not create a new response to an argument if parent ID is missing', (done) => {
+            chai.request(server)
+                .post('/api/arg/create/arg')
+                .send(testArg)
+                .end((err, res) => {
+                        res.should.have.status(200);
+                        let createdObjectId = res.body.createdNode.id
+                        let responseArg = JSON.parse(JSON.stringify(testArg))
+                        
+                        chai.request(server)
+                            .post('/api/arg/create/response/' + createdObjectId)
+                            .send(responseArg)
+                            .end((err, res) => {
+                                res.should.have.status(422);
+                                done()
+                            })
+                });
+          });
+
+
+          let argFields = Object.keys(testArg)
+
+          argFields.forEach((field, index) => {
+                let testArgMissingValues = JSON.parse(JSON.stringify(testArg))
+                testArgMissingValues[field] = ''
+                it('should successfully detect missing fields for a new argument: ' + field + '#'+ parseInt(index + 1), (done) => {
+                    chai.request(server)
+                        .post('/api/arg/create/arg')
+                        .send(testArgMissingValues)
+                        .end((err, res) => {
+                            if (field === 'sourceList') {
+                                res.should.have.status(200);    
+                            } else {
+                                res.should.have.status(422);
+                            }
+                            done();
+                        });
+                })
+
+          })
+
+          
     });
 })
