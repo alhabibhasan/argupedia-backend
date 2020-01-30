@@ -1,7 +1,7 @@
 const neo4j = require('neo4j-driver').v1
 const driver = neo4j.driver(process.env.NEO_HOST, neo4j.auth.basic(process.env.NEO_USERNAME, process.env.NEO_PASS))
 const {unwrapResult} = require('../read/util/argHelpers')
-const {isDeleted } = require('../util')
+const {argumentExists } = require('../util')
 
 let EXCLUDED_PROPS = ['root', 'parentId']
 let EXTRA_PROPS = ['updatedAt', 'deleted']
@@ -21,11 +21,10 @@ const updateArg = (id, argValues, deleted = false) => {
 
     id = parseInt(id)
 
-    return isDeleted(id, session).then(response => {
+    return argumentExists(id, session).then(argument => {
         session.close()
-        let isAlreadyDeleted = unwrapResult(response)[0]
-        if (isAlreadyDeleted === true) {
-            let msg = 'Arg has been deleted or does not exist.'
+        if (argument.deleted || !argument.exists) {
+            let msg = 'Argument has been deleted or does not exist.'
             return Promise.reject(msg)
         }
 
