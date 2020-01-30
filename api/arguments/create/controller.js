@@ -34,7 +34,7 @@ router.post('/response/:id', [validateArgResponse, validParams], (req, res, next
     .then(createdNode => {
         let originalNodeId = parseInt(req.body.parentId)
         let attackerId = parseInt(createdNode.nodeId)
-        return respondToArg(originalNodeId, attackerId, 'ATTACK', req.body.propertyToRespondTo)
+        return respondToArg(originalNodeId, attackerId, 'ATTACK')
     })
     .then(createdRelationship => {
         res.send({

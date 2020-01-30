@@ -72,7 +72,7 @@ const createArg = (arg) => {
     })
 }
 
-const respondToArg = (argToRespondToId, responderId, responseType = 'ATTACK', respondsToProperty) => {
+const respondToArg = (argToRespondToId, responderId, responseType = 'ATTACK') => {
     // Need to check that a relationship exists between node already before adding a new relationship.
     if (!isInt(argToRespondToId) || !isInt(responderId)) {
         console.log('ERROR: RespondToArg. Need integer ID values')
@@ -82,10 +82,9 @@ const respondToArg = (argToRespondToId, responderId, responseType = 'ATTACK', re
     const cypher = `MATCH (argToRespondTo:Argument) WHERE ID(argToRespondTo) = toInteger($argToRespondToId)
                     MATCH (respondingArg:Argument) WHERE ID(respondingArg) = toInteger($responderId)
                     CREATE (respondingArg)-[r:` + responseType.toUpperCase() + `]->(argToRespondTo)
-                    SET r.respondsToProperty = $respondsToProperty
                     RETURN respondingArg, r, argToRespondTo`
     const session = driver.session()
-    return session.run(cypher, {argToRespondToId, responderId, responseType, respondsToProperty})
+    return session.run(cypher, {argToRespondToId, responderId, responseType})
     .then(data => {
         session.close()
         let arg = unwrapResult(data)[0]
