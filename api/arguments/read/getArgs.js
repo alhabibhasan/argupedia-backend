@@ -83,7 +83,7 @@ const getRootArgs = () => {
 
     const linkedRootCypher = `MATCH p=(rootArg:Argument{root:true})-[r]-(args:Argument{root: true})
                               WHERE rootArg.deleted <> true 
-                              RETURN DISTINCT rootArg, RELATIONSHIPS(p) AS relationship, args`
+                              RETURN DISTINCT rootArg{.*, id:ID(rootArg)}, RELATIONSHIPS(p) AS relationship, args{.*, id:ID(args)}`
     let linkedRootNodeChainPromise = session.run(linkedRootCypher)
 
     const unlinkedRootCyper = `MATCH (arg:Argument{root: true}) 
