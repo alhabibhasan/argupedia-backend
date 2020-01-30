@@ -82,7 +82,7 @@ const respondToArg = (argToRespondToId, responderId, responseType = 'ATTACK') =>
     const cypher = `MATCH (argToRespondTo:Argument) WHERE ID(argToRespondTo) = toInteger($argToRespondToId)
                     MATCH (respondingArg:Argument) WHERE ID(respondingArg) = toInteger($responderId)
                     CREATE (respondingArg)-[r:` + responseType.toUpperCase() + `]->(argToRespondTo)
-                    RETURN respondingArg, r, argToRespondTo`
+                    RETURN respondingArg {.*, id: ID(respondingArg)}, r, argToRespondTo{.*, id:ID(argToRespondTo)}`
     const session = driver.session()
     return session.run(cypher, {argToRespondToId, responderId, responseType})
     .then(data => {
