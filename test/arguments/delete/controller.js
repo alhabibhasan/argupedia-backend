@@ -52,13 +52,33 @@ describe('Arguments', () => {
     })
 
     describe('/DELETE', () => {
-        it('should create a new argument and then delete it', (done) => {
+        it('should successfully delete an argument that exists', (done) => {
             chai.request(server)
-                .delete('/api/arg/delete/12')
+                .delete('/api/arg/delete/' + createdArgId)
                 .end((err, res) => {
-                    console.log(res.body)
+                    assert.equal(res.body.deleted, true)
                     done();
                 });
-        })     
+        })   
+        
+        it('should give an error message if trying to delete an argument again', (done) => {
+            chai.request(server)
+                .delete('/api/arg/delete/' + createdArgId)
+                .end((err, res) => {
+                    assert.equal(res.body.deleted, false)
+                    assert.equal(res.body.msg, "Argument has been deleted or does not exist.")
+                    done();
+                });
+        })  
+
+        it('should give an error message if trying to delete a non existing argument', (done) => {
+            chai.request(server)
+                .delete('/api/arg/delete/4543534345345' )
+                .end((err, res) => {
+                    assert.equal(res.body.deleted, false)
+                    assert.equal(res.body.msg, "Argument has been deleted or does not exist.")
+                    done();
+                });
+        })  
     });
 })
