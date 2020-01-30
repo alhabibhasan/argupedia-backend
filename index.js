@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('custom-env').env(true)
 
 const express = require('express')
 const app = express()
@@ -15,3 +15,5 @@ app.use('/api', cors(), api)
 
 
 app.listen(port, () => console.log(`App running on port ${port}!`))
+
+module.exports = app // for testing
