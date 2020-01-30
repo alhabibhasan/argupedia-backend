@@ -31,7 +31,7 @@ const updateArg = (id, argValues, deleted = false) => {
         let updateCypher = `MATCH (arg:Argument) 
                             WHERE ID(arg) = toInteger($id)
                             ` + setStatements + ` 
-                            RETURN arg`
+                            RETURN arg {.*, id: ID(arg)}`
 
         return session.run(updateCypher, { id, statement,
             argumentBasis, circumstance,
