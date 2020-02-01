@@ -1,4 +1,4 @@
-const {argumentExists} = require('../../api/arguments/util')
+const {exists} = require('../../api/arguments/argExistsMiddleware')
 
 require('custom-env').env('test')
 
@@ -33,7 +33,7 @@ describe('Utility Argument functions', () => {
 
     describe('#isDeleted', () => {
         it ('should correctly identify if an arguemnt doesnt exist', (done) => {
-            argumentExists(12, session)
+            exists(12)
             .then(response => {
                 assert.equal(response.exists, false)
                 done()
@@ -41,7 +41,7 @@ describe('Utility Argument functions', () => {
         })
 
         it ('should correctly identify an argument that does exist', (done) => {
-            argumentExists(idOfExistingArgument, session)
+            exists(idOfExistingArgument)
             .then(response => {
                 assert.equal(response.exists, true)
                 assert.equal(response.deleted, false)
@@ -55,7 +55,7 @@ describe('Utility Argument functions', () => {
                          SET a.deleted = true
                          RETURN ID(a)`, {id: idOfExistingArgument})
             .then(() => {
-                argumentExists(idOfExistingArgument, session)
+                exists(idOfExistingArgument)
                 .then(response => {
                     assert.equal(response.exists, true)
                     assert.equal(response.deleted, true)
