@@ -15,24 +15,17 @@ let EXTRA_PROPS = ['updatedAt', 'deleted']
 const updateArg = (id, argValues, deleted = false) => {
     const session = driver.session()
     let setStatements = createSetStatements(Object.keys(argValues))
-    let { statement, argumentBasis, circumstance, action, newCircumstance, goal, value, sourceList} = argValues
 
-    let updatedAt = new Date().toString()
-
-    id = parseInt(id)
+    argValues.deleted = deleted
+    argValues.id = parseInt(id)
+    argValues.updatedAt = new Date().toString()
 
     let updateCypher = `MATCH (arg:Argument) 
                         WHERE ID(arg) = toInteger($id)
                         ` + setStatements + ` 
                         RETURN arg {.*, id: ID(arg)}`
 
-    return session.run(updateCypher, { id, statement,
-        argumentBasis, circumstance,
-        action, newCircumstance,
-        goal, value,
-        sourceList, updatedAt,
-        deleted
-    }).then(data => {
+    return session.run(updateCypher, argValues).then(data => {
         let node = unwrapResult(data)[0]
         return node.properties
     })
