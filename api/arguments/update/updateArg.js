@@ -1,9 +1,8 @@
 const neo4j = require('neo4j-driver').v1
 const driver = neo4j.driver(process.env.NEO_HOST, neo4j.auth.basic(process.env.NEO_USERNAME, process.env.NEO_PASS))
-const {unwrapResult} = require('../read/util/argHelpers')
-const {argumentExists } = require('../argExistsMiddleware')
+const {unwrapResult, createArgumentObject} = require('../read/util/argHelpers')
 
-let EXCLUDED_PROPS = ['root', 'parentId']
+let EXCLUDED_PROPS = ['root', 'parentId', 'id', 'uid']
 let EXTRA_PROPS = ['updatedAt', 'deleted']
 
 /**
@@ -27,7 +26,7 @@ const updateArg = (id, argValues, deleted = false) => {
 
     return session.run(updateCypher, argValues).then(data => {
         let node = unwrapResult(data)[0]
-        return node.properties
+        return createArgumentObject(node)
     })
     .catch(err => {
         console.log(err)
