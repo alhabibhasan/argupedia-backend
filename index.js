@@ -7,8 +7,6 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const SWITCH_PORT_IF_IN_USE = process.env.SWITCH_PORT_IF_IN_USE
 
-console.log(SWITCH_PORT_IF_IN_USE)
-
 const api = require('./api/routes')
 
 app.use(bodyParser.json())

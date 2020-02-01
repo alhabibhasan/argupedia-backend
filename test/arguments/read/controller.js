@@ -32,6 +32,7 @@ let testUser = {
 }
 
 const MOCK_NODES_TO_MAKE = 10
+let CREATED_NODE_IDS = []
 
 describe('Arguments', () => {
     before((done) => {
@@ -44,9 +45,11 @@ describe('Arguments', () => {
                     res.should.have.status(200)
 
                     let createdObjectId = res.body.createdNode.id
+
                     let responseArg = JSON.parse(JSON.stringify(testArg))
                     responseArg.parentId = createdObjectId
-                    
+                    CREATED_NODE_IDS.push(createdObjectId)
+
                     for (let i = 0; i<MOCK_NODES_TO_MAKE;i++) {
                         chai.request(server)
                         .post('/api/arg/create/response/' + createdObjectId)
@@ -96,5 +99,48 @@ describe('Arguments', () => {
                     done()
                 });
         });
+
+        it('should be able to get a arg chain for a node with given ID', (done) => {
+            const  getRandomInt = (min, max) =>  {
+                min = Math.ceil(min)
+                max = Math.floor(max)
+                return Math.floor(Math.random() * (max - min + 1)) + min
+            }
+
+            let randomCreatedNodeID = JSON.stringify(CREATED_NODE_IDS[getRandomInt(0, CREATED_NODE_IDS.length - 1)])
+
+            chai.request(server)
+                .get('/api/arg/read/argChain/' + randomCreatedNodeID)
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    res.body.argChain.nodes.should.not.be.a('null')
+                    res.body.argChain.nodes.should.be.a('array')
+                    res.body.argChain.links.should.not.be.a('null')
+                    res.body.argChain.links.should.be.a('array')
+                    done()
+                });
+        });
+
+        it('should be able to get a thread for a node with given ID', (done) => {
+            const  getRandomInt = (min, max) =>  {
+                min = Math.ceil(min)
+                max = Math.floor(max)
+                return Math.floor(Math.random() * (max - min + 1)) + min
+            }
+
+            let randomCreatedNodeID = JSON.stringify(CREATED_NODE_IDS[getRandomInt(0, CREATED_NODE_IDS.length - 1)])
+
+            chai.request(server)
+                .get('/api/arg/read/thread/' + randomCreatedNodeID)
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    res.body.thread.node.should.not.be.a('null')
+                    res.body.thread.node.id.should.be.a('string')
+                    res.body.thread.attackers.should.not.be.a('null')
+                    res.body.thread.attackers.should.be.a('array')
+                    done()
+                });
+        });
+
     });
 })
