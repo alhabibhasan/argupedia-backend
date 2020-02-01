@@ -2,9 +2,12 @@ require('custom-env').env(true)
 
 const express = require('express')
 const app = express()
-const port = 8080
+let port = 8080
 const cors = require('cors')
 const bodyParser = require('body-parser')
+const SWITCH_PORT_IF_IN_USE = process.env.SWITCH_PORT_IF_IN_USE
+
+console.log(SWITCH_PORT_IF_IN_USE)
 
 const api = require('./api/routes')
 
@@ -12,8 +15,16 @@ app.use(bodyParser.json())
 
 app.use('/api', cors(), api)
 
+const handlePortError = (err) => {
+    if (err.code === 'EADDRINUSE' && SWITCH_PORT_IF_IN_USE === true) {
+        port++
+        app.listen(port, () => console.log(`App running on port ${port}!`)).on('error', handlePortError)
+    } else {
+        console.log(`Port ${port} is already in use, please close other instances to continue.`)
+    }
+}
 
+app.listen(port, () => console.log(`App running on port ${port}!`)).on('error', handlePortError)
 
-app.listen(port, () => console.log(`App running on port ${port}!`))
 
 module.exports = app // for testing
