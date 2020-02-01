@@ -1,15 +1,13 @@
 const express = require('express')
 const router = express.Router()
 const {getRootArgChain, getRootArgs, getThreadForRoot} = require('./getArgs')
+const {argumentExistsMiddleware} = require('../argExistsMiddleware')
 
 const {check} = require('express-validator');
 const validParams = require('../../util/validate-argument')
+const {validateId} = require('../validation')
 
-const validateId = [
-    check('id').isNumeric({no_symbols: true}).withMessage('arg id must be a whole number')
-]
-
-router.get('/argChain/:id', [validateId, validParams], (req, res) => {
+router.get('/argChain/:id', [validateId, validParams, argumentExistsMiddleware], (req, res) => {
     getRootArgChain(req.params.id)
     .then(argChain => {
         res.send({
@@ -28,7 +26,7 @@ router.get('/rootArgs', (req, res) => {
     })
 })
 
-router.get('/thread/:id', [validateId, validParams], (req, res) => {
+router.get('/thread/:id', [validateId, validParams, argumentExistsMiddleware], (req, res) => {
     getThreadForRoot(req.params.id)
     .then(thread => {
         res.send({

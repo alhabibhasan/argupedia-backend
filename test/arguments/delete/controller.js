@@ -61,12 +61,12 @@ describe('Arguments', () => {
                 });
         })   
         
-        it('should give an error message if trying to delete an argument again', (done) => {
+        it('should return deleted if trying to delete a deleted argument again', (done) => {
             chai.request(server)
                 .delete('/api/arg/delete/' + createdArgId)
                 .end((err, res) => {
-                    assert.equal(res.body.deleted, false)
-                    assert.equal(res.body.msg, "Argument has been deleted or does not exist.")
+                    assert.equal(res.body.deleted, true)
+                    assert.equal(res.body.msg, 'This message has been deleted')
                     done();
                 });
         })  
@@ -76,7 +76,8 @@ describe('Arguments', () => {
                 .delete('/api/arg/delete/4543534345345' )
                 .end((err, res) => {
                     assert.equal(res.body.deleted, false)
-                    assert.equal(res.body.msg, "Argument has been deleted or does not exist.")
+                    assert.equal(res.body.exists, false)
+                    assert.equal(res.body.msg, 'This argument does not exist')
                     done();
                 });
         })  

@@ -34,6 +34,12 @@ let testUser = {
 const MOCK_NODES_TO_MAKE = 10
 let CREATED_NODE_IDS = []
 
+const  getRandomInt = (min, max) =>  {
+    min = Math.ceil(min)
+    max = Math.floor(max)
+    return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
 describe('Arguments', () => {
     before((done) => {
         let createPost = (final) => {
@@ -122,11 +128,6 @@ describe('Arguments', () => {
         });
 
         it('should be able to get a thread for a node with given ID', (done) => {
-            const  getRandomInt = (min, max) =>  {
-                min = Math.ceil(min)
-                max = Math.floor(max)
-                return Math.floor(Math.random() * (max - min + 1)) + min
-            }
 
             let randomCreatedNodeID = JSON.stringify(CREATED_NODE_IDS[getRandomInt(0, CREATED_NODE_IDS.length - 1)])
 
@@ -138,6 +139,36 @@ describe('Arguments', () => {
                     res.body.thread.node.id.should.be.a('string')
                     res.body.thread.attackers.should.not.be.a('null')
                     res.body.thread.attackers.should.be.a('array')
+                    done()
+                });
+        });
+
+        it('should get an empty response when you request a non existant thread', (done) => {
+
+            // using arbitrary large number that is not likely in test env.
+            let randomCreatedNodeID = getRandomInt(10000, 40000)
+
+            chai.request(server)
+                .get('/api/arg/read/thread/' + randomCreatedNodeID)
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    res.body.exists.should.be.a('boolean')
+                    res.body.exists.should.be.false    
+                    done()
+                });
+        });
+
+        it('should get an empty response when you request a non existant chain', (done) => {
+
+            // using arbitrary large number that is not likely in test env.
+            let randomCreatedNodeID = getRandomInt(10000, 40000)
+
+            chai.request(server)
+                .get('/api/arg/read/argChain/' + randomCreatedNodeID)
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    res.body.exists.should.be.a('boolean')
+                    res.body.exists.should.be.false    
                     done()
                 });
         });
