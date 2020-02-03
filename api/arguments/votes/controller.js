@@ -3,16 +3,20 @@ const router = express.Router()
 const validParams = require('../../util/validate-argument')
 const {validateId} = require('../validation')
 const {validateUid} = require('../../users/validation')
+const {upvote, downvote} = require('./votes')
+const {argumentExistsMiddleware} = require('../argExistsMiddleware')
 
-router.post('/up/:id', [validateId, validateUid ,validParams], (req, res, next) => {
-    res.send({
-        voted: false
+router.post('/up/:id', [validateId, validateUid ,validParams, argumentExistsMiddleware], (req, res, next) => {
+    upvote(req.params.id, req.body.uid)
+    .then(response => {
+        res.send(response)
     })
 })
 
-router.post('/down/:id', [validateId, validateUid ,validParams], (req, res, next) => {
-    res.send({
-        voted: false
+router.post('/down/:id', [validateId, validateUid ,validParams, argumentExistsMiddleware], (req, res, next) => {
+    downvote(req.params.id, req.body.uid)
+    .then(response => {
+        res.send(response)
     })
 })
 
