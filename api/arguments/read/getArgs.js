@@ -20,9 +20,11 @@ const driver = neo4j.driver(process.env.NEO_HOST, neo4j.auth.basic(process.env.N
 const getRootArgChain = (rootId) => {
     const session = driver.session()
 
-    const relationshipsCypher = `MATCH p=(rootArg:Argument)<-[*]-(args:Argument) 
+    const relationshipsCypher = `MATCH p=(rootArg:Argument)<-[*]-(otherNode) 
                     WHERE ID(rootArg) = toInteger($rootId)
-                    RETURN rootArg{.*, id: ID(rootArg)}, RELATIONSHIPS(p) AS relationship, args{.*, id: ID(args)}`
+                    RETURN rootArg{.*, id: ID(rootArg)}, 
+                           RELATIONSHIPS(p) AS relationship, 
+                           otherNode {.*, id: ID(otherNode), type:labels(otherNode)[0]}`
     let rootNodeChainPromise = session.run(relationshipsCypher, {rootId: rootId})
 
     const rootNodeCypher = `MATCH (root:Argument) 
