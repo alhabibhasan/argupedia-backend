@@ -22,61 +22,62 @@ let testArg = {
     "value": "This is a test value",
     "sourceList": "['www.this-is-a-test-extra-resource.com',]",
     "root": true,
-    "uid": "O2rZ7n0cAN26uJOLZPam0GrGCk2",
+    "uid": "pO2rZ7n0cAN26uJOLZPam0GrGCk2",
 }
 
 let testUser = {
-    uid: 'pO2rZ7n0cAN26uJOLZPam0GrGCk2',
-    displayName: 'test user',
-    email: 'Test@test.com'
+    uid: "pO2rZ7n0cAN26uJOLZPam0GrGCk2",
+    displayName: "test user",
+    email: "Test@test.com"
 }
 
 let createdPost
 
 describe('Arguments', () => {
-    before((done) => {
-        let createPost = () => {
-            chai.request(server)
-                .post('/api/arg/create/arg')
-                .send(testArg)
-                .end((err, res) => {
-                    res.should.have.status(200)
-                    res.body.createdNode.should.not.be.a('null')
-                    createdPost = res.body.createdNode
 
-                    console.log('Created mock posts to edit')
-                    done()
-                });
-        }
-        console.log('Creating mock posts to edit')
-        chai.request(server)
-            .post('/api/user/create')
-            .send(testUser)
-            .end((err, res) => {
-                res.should.have.status(200)
-                createPost()
-            });
-    })
-
-    after((done) => {
-        let session = driver.session()
-        // Clear the test database
-        session.run('MATCH (args:Argument) DETACH DELETE (args)')
-        .then(() => {
-            session.close()
-            done()
-        })
-    })
 
     describe('/VOTE', () => {
+
+        beforeEach((done) => {
+            let createPost = () => {
+                chai.request(server)
+                    .post('/api/arg/create/arg')
+                    .send(testArg)
+                    .end((err, res) => {
+                        res.should.have.status(200)
+                        res.body.createdNode.should.not.be.a('null')
+                        createdPost = res.body.createdNode
+                        done()
+                    });
+            }
+            chai.request(server)
+                .post('/api/user/create')
+                .send(testUser)
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    createPost()
+                });
+        })
+    
+        afterEach((done) => {
+            let session = driver.session()
+            // Clear the test database
+            session.run('MATCH (args:Argument) DETACH DELETE (args)')
+            .then(() => {
+                session.close()
+                done()
+            })
+        })
+
         it('should add an up vote to an argument given a valid id', (done) => {
             chai.request(server)
                 .post('/api/arg/vote/up/' + createdPost.id)
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
-                    res.body.voted.should.be.a('boolean')
-                    assert.equal(res.body.voted, true)
+                    res.body.voted.should.be.a('string')
+                    assert.equal(res.body.voted, 'UP')
+                    assert.equal(res.body.argId, createdPost.id)
                     done()
                 });
         });
@@ -87,39 +88,125 @@ describe('Arguments', () => {
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
-                    res.body.voted.should.be.a('boolean')
-                    assert.equal(res.body.voted, true)
+                    res.body.voted.should.be.a('string')
+                    assert.equal(res.body.voted, 'DOWN')
+                    assert.equal(res.body.argId, createdPost.id)
                     done()
                 });
         });
 
         it('should give error message and return a flag if node with ID doesnt exist', (done) => {
+            chai.request(server)
+                .post('/api/arg/vote/up/1233445678987654')
+                .send(testUser)
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    res.body.exists.should.be.a('boolean')
+                    res.body.msg.should.be.a('string')
+                    assert.equal(res.body.msg, 'This argument does not exist')
+                    assert.equal(res.body.exists, false)
+
+                    done()
+                });
+        });
+
+        it('should give error message and return a flag if node with ID doesnt exist', (done) => {
+            chai.request(server)
+                .post('/api/arg/vote/down/1234567890')
+                .send(testUser)
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    res.body.exists.should.be.a('boolean')
+                    res.body.msg.should.be.a('string')
+                    assert.equal(res.body.msg, 'This argument does not exist')
+                    assert.equal(res.body.exists, false)
+
+                    done()
+                });
+        });
+
+        it('should delete the vote if the user votes in one way twice (toggle up)', (done) => {
             chai.request(server)
                 .post('/api/arg/vote/up/' + createdPost.id)
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
-                    res.body.exists.should.be.a('boolean')
-                    res.body.msg.should.be.a('string')
-                    assert.equal(res.body.msg, 'This argument does not exist')
-                    assert.equal(res.body.exists, false)
 
-                    done()
+                    chai.request(server)
+                        .post('/api/arg/vote/up/' + createdPost.id)
+                        .send(testUser)
+                        .end((err, res) => {
+                            res.should.have.status(200)
+                            
+                            res.body.voted.should.be.a('string')
+                            assert.equal(res.body.voted, 'DELETED UP VOTE')
+                            assert.equal(res.body.argId, createdPost.id)
+                            done()
+                        });
                 });
         });
 
-        it('should give error message and return a flag if node with ID doesnt exist', (done) => {
+        it('should delete the vote if the user votes in one way twice (toggle down)', (done) => {
             chai.request(server)
                 .post('/api/arg/vote/down/' + createdPost.id)
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
-                    res.body.exists.should.be.a('boolean')
-                    res.body.msg.should.be.a('string')
-                    assert.equal(res.body.msg, 'This argument does not exist')
-                    assert.equal(res.body.exists, false)
 
-                    done()
+                    chai.request(server)
+                        .post('/api/arg/vote/down/' + createdPost.id)
+                        .send(testUser)
+                        .end((err, res) => {
+                            res.should.have.status(200)
+                            
+                            res.body.voted.should.be.a('string')
+                            assert.equal(res.body.voted, 'DELETED DOWN VOTE')
+                            assert.equal(res.body.argId, createdPost.id)
+                            done()
+                        });
+                });
+        });
+
+
+        it('should replace up vote with down vote if you upvote and then downvote', (done) => {
+            chai.request(server)
+                .post('/api/arg/vote/up/' + createdPost.id)
+                .send(testUser)
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    assert.equal(res.body.voted, 'UP')
+                    chai.request(server)
+                        .post('/api/arg/vote/down/' + createdPost.id)
+                        .send(testUser)
+                        .end((err, res) => {
+                            res.should.have.status(200)
+                            
+                            res.body.voted.should.be.a('string')
+                            assert.equal(res.body.voted, 'DOWN')
+                            assert.equal(res.body.argId, createdPost.id)
+                            done()
+                        });
+                });
+        });
+
+        it('should replace down vote with up vote if you downvoted and then upvote', (done) => {
+            chai.request(server)
+                .post('/api/arg/vote/down/' + createdPost.id)
+                .send(testUser)
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    assert.equal(res.body.voted, 'DOWN')
+                    chai.request(server)
+                        .post('/api/arg/vote/up/' + createdPost.id)
+                        .send(testUser)
+                        .end((err, res) => {
+                            res.should.have.status(200)
+                            
+                            res.body.voted.should.be.a('string')
+                            assert.equal(res.body.voted, 'UP')
+                            assert.equal(res.body.argId, createdPost.id)
+                            done()
+                        });
                 });
         });
 
