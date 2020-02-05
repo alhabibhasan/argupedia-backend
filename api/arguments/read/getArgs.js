@@ -22,7 +22,7 @@ const getRootArgChain = (rootId) => {
 
     const relationshipsCypher = `MATCH p=(rootArg:Argument)<-[*]-(otherNode) 
                     WHERE ID(rootArg) = toInteger($rootId)
-                    RETURN rootArg{.*, id: ID(rootArg)}, 
+                    RETURN rootArg{.*, id: ID(rootArg), type:labels(rootArg)[0]}, 
                            RELATIONSHIPS(p) AS relationship, 
                            otherNode {.*, id: ID(otherNode), type:labels(otherNode)[0]}`
     let rootNodeChainPromise = session.run(relationshipsCypher, {rootId: rootId})
@@ -93,7 +93,7 @@ const getRootArgs = () => {
                                MATCH (user:User) 
                                WHERE arg.creatorUID = user.uid
                                WITH arg, user.displayName as userDisplayName, ID(arg) as id
-                               RETURN arg {.*, userDisplayName: userDisplayName, id: id} as arg`
+                               RETURN arg {.*, userDisplayName: userDisplayName, id: id, type:labels(arg)[0]} as arg`
 
     let unlinkedRootPromise = session.run(unlinkedRootCyper)
 
