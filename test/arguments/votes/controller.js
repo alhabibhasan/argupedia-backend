@@ -33,6 +33,8 @@ let testUser = {
 
 let createdPost
 
+
+
 describe('Arguments', () => {
 
 
@@ -208,6 +210,102 @@ describe('Arguments', () => {
                             done()
                         });
                 });
+        });
+
+        it('should get the number of downvotes an argument has and the current users vote choice', (done) => {
+            chai.request(server)
+                .post('/api/arg/vote/down/' + createdPost.id)
+                .send(testUser)
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    assert.equal(res.body.voted, 'DOWN')
+                    chai.request(server)
+                        .get('/api/arg/vote/' + createdPost.id)
+                        .send(testUser)
+                        .end((err, res) => {
+                            assert.equal(res.body.upvotes, 0)
+                            assert.equal(res.body.downvotes, 1)
+                            assert.equal(res.body.userVote, 'DOWN')
+                            res.should.have.status(200)
+                            done()
+                        });
+                });
+        });
+
+        it('should get the number of upvotes an argument has and the current users vote choice', (done) => {
+            chai.request(server)
+                .post('/api/arg/vote/up/' + createdPost.id)
+                .send(testUser)
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    assert.equal(res.body.voted, 'UP')
+                    chai.request(server)
+                        .get('/api/arg/vote/' + createdPost.id)
+                        .send(testUser)
+                        .end((err, res) => {
+                            assert.equal(res.body.downvotes, 0)
+                            assert.equal(res.body.upvotes, 1)
+                            assert.equal(res.body.userVote, 'UP')
+                            res.should.have.status(200)
+                            done()
+                        });
+                });
+        });
+
+        const  getRandomInt = (min, max) =>  {
+            min = Math.ceil(min)
+            max = Math.floor(max)
+            return Math.floor(Math.random() * (max - min + 1)) + min
+        }
+
+        it('should get the number correct of downvotes an argument has', (done) => {
+            const noOfDownvotes = getRandomInt(10, 40)
+            const downvote = (final) => {
+                testUser.uid += JSON.stringify(Math.random())
+                chai.request(server)
+                .post('/api/arg/vote/down/' + createdPost.id)
+                .send(testUser)
+                .end((err, res) => {
+                    res.should.have.status(200)
+
+                    if (final) {
+                        chai.request(server)
+                            .get('/api/arg/vote/' + createdPost.id)
+                            .send(testUser)
+                            .end((err, res) => {
+                                res.should.have.status(200)
+                                assert.equal(res.body.downvotes, noOfDownvotes)
+                                done()
+                            });
+                    }
+                })
+            }
+            for (let i = 0; i < noOfDownvotes; i++) downvote(i === (noOfDownvotes-1))
+        });
+
+        it('should get the number correct of upvotes an argument has', (done) => {
+            const noOfUpvotes = getRandomInt(10, 40)
+            const downvote = (final) => {
+                testUser.uid += JSON.stringify(Math.random())
+                chai.request(server)
+                .post('/api/arg/vote/up/' + createdPost.id)
+                .send(testUser)
+                .end((err, res) => {
+                    res.should.have.status(200)
+
+                    if (final) {
+                        chai.request(server)
+                            .get('/api/arg/vote/' + createdPost.id)
+                            .send(testUser)
+                            .end((err, res) => {
+                                res.should.have.status(200)
+                                assert.equal(res.body.upvotes, noOfUpvotes)
+                                done()
+                            });
+                    }
+                })
+            }
+            for (let i = 0; i < noOfUpvotes; i++) downvote(i === (noOfUpvotes-1))
         });
 
     });
