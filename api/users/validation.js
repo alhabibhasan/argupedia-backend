@@ -17,8 +17,16 @@ const validateUid = [
         .isLength({min:5}).withMessage('UID is too short')
 ]
 
+const validateOptionalUid = [
+    check('uid')
+        .isString().withMessage('UID must be a string.')
+        .isLength({min:5}).withMessage('UID is too short')
+        .optional()
+]
+
 module.exports = {
     validateEmail,
     validateDisplayName,
-    validateUid
+    validateUid,
+    validateOptionalUid
 }
