@@ -40,7 +40,7 @@ describe('Arguments', () => {
     })
 
     describe('/POST', () => {
-        it('should create a new argument', (done) => {
+        it('should create a new argument with all required fields', (done) => {
           chai.request(server)
               .post('/api/arg/create/arg')
               .send(testArg)

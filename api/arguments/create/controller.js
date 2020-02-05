@@ -23,7 +23,7 @@ router.post('/arg', [validateArg, validateUid ,validParams], (req, res, next) =>
     })
 })
 
-router.post('/response/:id', [validateArgResponse, validParams], (req, res, next) => {
+router.post('/response/:id', [validateArgResponse, validateUid, validParams], (req, res, next) => {
     let createdNodeToReturn
     createArg(req.body)
     .then(createdNode => {

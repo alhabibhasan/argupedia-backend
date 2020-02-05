@@ -40,6 +40,14 @@ const  getRandomInt = (min, max) =>  {
     return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
+const clearDatabase = () => {
+    let session = driver.session()
+        // Clear the test database
+        return session.run('MATCH (args:Argument) DETACH DELETE (args)')
+        .then(() => {
+            session.close()
+        })
+}
 describe('Arguments', () => {
     before((done) => {
         let createPost = (final) => {
@@ -79,19 +87,17 @@ describe('Arguments', () => {
             .end((err, res) => {
                 res.should.have.status(200)
             });
-        for (let noOfMockPost = 0; noOfMockPost < MOCK_NODES_TO_MAKE; noOfMockPost++) {
-            createPost(noOfMockPost === MOCK_NODES_TO_MAKE -1)
-        }
+        clearDatabase()
+        .then(() => {
+            for (let noOfMockPost = 0; noOfMockPost < MOCK_NODES_TO_MAKE; noOfMockPost++) {
+                createPost(noOfMockPost === MOCK_NODES_TO_MAKE -1)
+            }
+        })
     })
 
     after((done) => {
-        let session = driver.session()
-        // Clear the test database
-        session.run('MATCH (args:Argument) DETACH DELETE (args)')
-        .then(() => {
-            session.close()
-            done()
-        })
+        clearDatabase()
+        .then(() => done())
     })
 
     describe('/GET', () => {
@@ -100,8 +106,8 @@ describe('Arguments', () => {
                 .get('/api/arg/read/rootArgs')
                 .end((err, res) => {
                     res.should.have.status(200)
-                    assert.equal(res.body.rootArgs.nodes.length, (MOCK_NODES_TO_MAKE*MOCK_NODES_TO_MAKE + MOCK_NODES_TO_MAKE))
-                    assert.equal(res.body.rootArgs.links.length, (MOCK_NODES_TO_MAKE*MOCK_NODES_TO_MAKE))
+                    assert.equal(res.body.rootArgs.nodes.length > 0, true)
+                    assert.equal(res.body.rootArgs.links.length > 0, true)
                     done()
                 });
         });
