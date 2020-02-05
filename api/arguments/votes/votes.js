@@ -6,7 +6,18 @@ const voteTypes = {
     'up': 'UP',
     'down' : 'DOWN'
 }
-const addVote =  (argId, uid, type) => {
+/**
+ * This function is called to add a vote of a given type.
+ * 
+ * It will : 
+ * - check if a vote has already been added in which case it will remove the vote.
+ * - if user has up voted and now is trying to down vote, will remove the up vote and add the down vote and vice versa
+ * 
+ * @param {*} argId 
+ * @param {*} uid 
+ * @param {*} type 
+ */
+const castVote =  (argId, uid, type) => {
     let voteType = voteTypes[type]
     if (!voteType || !voteType.length || !type || !type.length) {
         return Promise.resolve({
@@ -34,7 +45,7 @@ const addVote =  (argId, uid, type) => {
 
 const deleteVote = (argId, uid, type) => {
     let deleteVoteCypher = `MATCH (v:Vote) 
-                        WHERE v.argId=$argId AND v.uid=$uid
+                        WHERE v.argId=toInteger($argId) AND v.uid=$uid
                         DETACH DELETE v`
     let session = driver.session()
     return session.run(deleteVoteCypher, {argId, uid})
@@ -48,7 +59,7 @@ const deleteVote = (argId, uid, type) => {
 }
 
 const createVote = (argId, uid, type) => {
-    const createVoteCyper = `CREATE (v:Vote{argId: $argId, 
+    const createVoteCyper = `CREATE (v:Vote{argId: toInteger($argId), 
                                     type: $type , 
                                     uid: $uid,
                                     deleted: $deleted,
@@ -87,7 +98,7 @@ const createVote = (argId, uid, type) => {
 
 const checkIfVoteExists = (argId, uid) => {
     let checkVoteExistsCypher = `MATCH (v:Vote) 
-                                WHERE v.argId=$argId
+                                WHERE v.argId=toInteger($argId)
                                 AND v.uid=$uid
                                 AND v.deleted=false
                                 RETURN v {type: v.type}`
@@ -99,15 +110,51 @@ const checkIfVoteExists = (argId, uid) => {
     }) 
 }
 
+const getVotes = (argId, uid = '') => {
+    const getVotesCypher = `MATCH (v:Vote) WHERE v.argId = toInteger($argId) AND v.type='DOWN'
+                            RETURN {downvotes: COUNT(v)} AS votes
+                            UNION
+                            MATCH (v:Vote) WHERE v.argId = toInteger($argId) AND v.type='UP'
+                            RETURN {upvotes: COUNT(v)} AS votes`
+
+    let session = driver.session()
+    return session.run(getVotesCypher, {argId})
+    .then((votes) => {
+        session.close()
+        votes = unwrapResult(votes)
+        let upvotes, downvotes
+        if (votes.length === 2) {
+            downvotes = neo4j.integer.toNumber(votes[0].downvotes)
+            upvotes = neo4j.integer.toNumber(votes[1].upvotes)
+        }
+        let toReturn = {
+            upvotes, downvotes
+        }
+        if (uid && uid.length > 0) {
+            return checkIfVoteExists(argId, uid)
+            .then(userVote => {
+                if (userVote && userVote.type) {
+                    toReturn['userVote'] = userVote.type
+                    return toReturn
+                } else {
+                    return toReturn
+                }
+            })
+        }
+        return toReturn
+    })
+}
+
 const upvote = (argId, uid) => {
-    return addVote(argId, uid, 'up')
+    return castVote(argId, uid, 'up')
 }
 
 const downvote = (argId, uid) => {
-    return addVote(argId, uid, 'down')
+    return castVote(argId, uid, 'down')
 }
 
 module.exports = {
     upvote,
-    downvote
+    downvote,
+    getVotes
 }
