@@ -146,9 +146,19 @@ const getThreadForRoot = (rootId) => {
     return getRootArgChain(rootId)
     .then(nodes => {
         let nodesWithLinks = nodes.nodesWithLinks
+        nodesWithLinks = removeVotes(nodesWithLinks)
         let withAttackers = getNodesWithAttackers(nodesWithLinks)
         return getThread(rootId, withAttackers)
     })
+}
+
+const removeVotes = (chain) => {
+    let cleanedNodes = chain.nodes.filter(node => node.type !== 'Vote')
+    let cleanedLinks = chain.links.filter(link => link.type !== 'Votes')
+    return {
+        nodes: cleanedNodes,
+        links: cleanedLinks
+    }
 }
 
 module.exports = {
