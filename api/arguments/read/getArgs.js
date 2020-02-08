@@ -40,9 +40,37 @@ const getRootArgChain = (rootId) => {
             node['status'] = label
             return node
         })
-        
-        return {nodesWithLinks}
+        return {
+            nodesWithLinks: generateConfigCodes(nodesWithLinks)
+        }
 
+    })
+}
+
+/**
+ * Given a node, generate a config code that can be used by the front end to quickly 
+ * and easily classify the type and status of an argument. e.g. if an object is an argument and it is OUT or IN then arg-in
+ * if an object is a vote that is an up vote or down vote, then vote-up etc.
+ */
+const generateConfigCodes = (nodesWithLinks) => {
+    return nodesWithLinks.nodes.map(node => {
+        let nodeCopy = JSON.parse(JSON.stringify(node))
+        let configCode = ''
+        let nodeType = node.type.toLowerCase()
+
+        if (node.type === 'Argument') {
+            let isRoot = (node.root ? 'root' : '')
+            let nodeStatus = node.status.toLowerCase()
+            if (node.root) configCode = [isRoot, nodeType, nodeStatus].join('-') 
+            else configCode = [nodeType, nodeStatus].join('-') 
+        }
+        if (node.type === 'Vote') {
+            let upDown = node.position.toLowerCase()
+            configCode = [nodeType, upDown].join('-')
+        }
+
+        nodeCopy.configCode = configCode
+        return nodeCopy
     })
 }
 
