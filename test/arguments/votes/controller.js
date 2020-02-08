@@ -220,7 +220,7 @@ describe('Arguments', () => {
                     res.should.have.status(200)
                     assert.equal(res.body.voted, 'DOWN')
                     chai.request(server)
-                        .get('/api/arg/vote/' + createdPost.id)
+                        .post('/api/arg/vote/' + createdPost.id)
                         .send(testUser)
                         .end((err, res) => {
                             assert.equal(res.body.upvotes, 0)
@@ -240,7 +240,7 @@ describe('Arguments', () => {
                     res.should.have.status(200)
                     assert.equal(res.body.voted, 'UP')
                     chai.request(server)
-                        .get('/api/arg/vote/' + createdPost.id)
+                        .post('/api/arg/vote/' + createdPost.id)
                         .send(testUser)
                         .end((err, res) => {
                             assert.equal(res.body.downvotes, 0)
@@ -264,7 +264,7 @@ describe('Arguments', () => {
 
                     if (final) {
                         chai.request(server)
-                            .get('/api/arg/vote/' + createdPost.id)
+                            .post('/api/arg/vote/' + createdPost.id)
                             .send(testUser)
                             .end((err, res) => {
                                 res.should.have.status(200)
@@ -289,7 +289,7 @@ describe('Arguments', () => {
 
                     if (final) {
                         chai.request(server)
-                            .get('/api/arg/vote/' + createdPost.id)
+                            .post('/api/arg/vote/' + createdPost.id)
                             .send(testUser)
                             .end((err, res) => {
                                 res.should.have.status(200)
