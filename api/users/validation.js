@@ -20,7 +20,7 @@ const validateUid = [
 const validateOptionalUid = [
     check('uid')
         .isString().withMessage('UID must be a string.')
-        .isLength({min:5}).withMessage('UID is too short')
+        .isLength({min:0}).withMessage('UID is too short')
         .optional()
 ]
 
