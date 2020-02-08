@@ -2,12 +2,12 @@
 const neo4j = require('neo4j-driver').v1
 const driver = neo4j.driver(process.env.NEO_HOST, neo4j.auth.basic(process.env.NEO_USERNAME, process.env.NEO_PASS))
 const {unwrapResult} = require('../read/util/argHelpers')
-const voteTypes = {
+const votePositions = {
     'up': 'UP',
     'down' : 'DOWN'
 }
 /**
- * This function is called to add a vote of a given type.
+ * This function is called to add a vote of a given position.
  * 
  * It will : 
  * - check if a vote has already been added in which case it will remove the vote.
@@ -15,35 +15,35 @@ const voteTypes = {
  * 
  * @param {*} argId 
  * @param {*} uid 
- * @param {*} type 
+ * @param {*} position 
  */
-const castVote =  (argId, uid, type) => {
-    let voteType = voteTypes[type]
-    if (!voteType || !voteType.length || !type || !type.length) {
+const castVote =  (argId, uid, position) => {
+    let votePosition = votePositions[position]
+    if (!votePosition || !votePosition.length || !position || !position.length) {
         return Promise.resolve({
-            err: 'Need to supply a vote type'
+            err: 'Need to supply a vote position'
         })
     }
 
     return checkIfVoteExists(argId, uid)
     .then(voteExists => {
         if (!voteExists) {
-            return createVote(argId, uid, voteType)
-        } else if (voteExists.type && voteExists.type === voteType) {
-            // check if current requested type matches stored type, if so delete vote
-            return deleteVote(argId, uid, voteType)
-        } else if (voteExists.type && voteExists.type !== voteType) {
-            // if current requested type doesnt match, deleted stored and save requested type
+            return createVote(argId, uid, votePosition)
+        } else if (voteExists.position && voteExists.position === votePosition) {
+            // check if current requested position matches stored position, if so delete vote
+            return deleteVote(argId, uid, votePosition)
+        } else if (voteExists.position && voteExists.position !== votePosition) {
+            // if current requested position doesnt match, deleted stored and save requested position
             return deleteVote(argId, uid)
             .then(() => {
-                return createVote(argId, uid, voteType)
+                return createVote(argId, uid, votePosition)
             })
         }
     })
     
 }
 
-const deleteVote = (argId, uid, type) => {
+const deleteVote = (argId, uid, position) => {
     let deleteVoteCypher = `MATCH (v:Vote) 
                         WHERE v.argId=toInteger($argId) AND v.uid=$uid
                         DETACH DELETE v`
@@ -51,16 +51,16 @@ const deleteVote = (argId, uid, type) => {
     return session.run(deleteVoteCypher, {argId, uid})
     .then(() => {
         let returnObj = {
-            voted: 'DELETED ' + type + ' VOTE' ,
+            voted: 'DELETED ' + position + ' VOTE' ,
             argId,
         }
         return returnObj
     })
 }
 
-const createVote = (argId, uid, type) => {
+const createVote = (argId, uid, position) => {
     const createVoteCyper = `CREATE (v:Vote{argId: toInteger($argId), 
-                                    type: $type , 
+                                    position: $position , 
                                     uid: $uid,
                                     deleted: $deleted,
                                     createdAt: $createdAt})
@@ -73,7 +73,7 @@ const createVote = (argId, uid, type) => {
 
         let vote = {
             argId,
-            type,
+            position,
             createdAt: new Date().toString(), 
             deleted: false,
             uid
@@ -88,7 +88,7 @@ const createVote = (argId, uid, type) => {
             .then(response => {
                 session.close()
                 let returnObj = {
-                    voted: vote.type,
+                    voted: vote.position,
                     argId,
                 }
                 return returnObj
@@ -101,7 +101,7 @@ const checkIfVoteExists = (argId, uid) => {
                                 WHERE v.argId=toInteger($argId)
                                 AND v.uid=$uid
                                 AND v.deleted=false
-                                RETURN v {type: v.type}`
+                                RETURN v {position: v.position}`
     let session = driver.session()
     return session.run(checkVoteExistsCypher, {argId, uid})
     .then(response => {
@@ -111,10 +111,10 @@ const checkIfVoteExists = (argId, uid) => {
 }
 
 const getVotes = (argId, uid = '') => {
-    const getVotesCypher = `MATCH (v:Vote) WHERE v.argId = toInteger($argId) AND v.type='DOWN'
+    const getVotesCypher = `MATCH (v:Vote) WHERE v.argId = toInteger($argId) AND v.position='DOWN'
                             RETURN {downvotes: COUNT(v)} AS votes
                             UNION
-                            MATCH (v:Vote) WHERE v.argId = toInteger($argId) AND v.type='UP'
+                            MATCH (v:Vote) WHERE v.argId = toInteger($argId) AND v.position='UP'
                             RETURN {upvotes: COUNT(v)} AS votes`
 
     let session = driver.session()
@@ -133,8 +133,8 @@ const getVotes = (argId, uid = '') => {
         if (uid && uid.length > 0) {
             return checkIfVoteExists(argId, uid)
             .then(userVote => {
-                if (userVote && userVote.type) {
-                    toReturn['userVote'] = userVote.type
+                if (userVote && userVote.position) {
+                    toReturn['userVote'] = userVote.position
                     return toReturn
                 } else {
                     return toReturn
