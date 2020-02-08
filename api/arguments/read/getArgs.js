@@ -40,8 +40,10 @@ const getRootArgChain = (rootId) => {
             node['status'] = label
             return node
         })
+
+        nodesWithLinks.nodes = generateConfigCodes(nodesWithLinks)
         return {
-            nodesWithLinks: generateConfigCodes(nodesWithLinks)
+            nodesWithLinks
         }
 
     })
@@ -53,7 +55,8 @@ const getRootArgChain = (rootId) => {
  * if an object is a vote that is an up vote or down vote, then vote-up etc.
  */
 const generateConfigCodes = (nodesWithLinks) => {
-    return nodesWithLinks.nodes.map(node => {
+    let nodesWithLinksCopy = JSON.parse(JSON.stringify(nodesWithLinks))
+    nodesWithLinksCopy.nodes = nodesWithLinksCopy.nodes.map(node => {
         let nodeCopy = JSON.parse(JSON.stringify(node))
         let configCode = ''
         let nodeType = node.type.toLowerCase()
@@ -72,6 +75,7 @@ const generateConfigCodes = (nodesWithLinks) => {
         nodeCopy.configCode = configCode
         return nodeCopy
     })
+    return nodesWithLinksCopy.nodes
 }
 
 const getLinksBetweenNodes = (argChain) => {
