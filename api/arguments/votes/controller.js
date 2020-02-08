@@ -20,7 +20,7 @@ router.post('/down/:id', [validateId, validateUid ,validParams, argumentExistsMi
     })
 })
 
-router.get('/:id', [validateId, validateOptionalUid ,validParams, argumentExistsMiddleware], (req, res, next) => {
+router.post('/:id', [validateId, validateOptionalUid ,validParams, argumentExistsMiddleware], (req, res, next) => {
     getVotes(req.params.id, req.body.uid)
     .then(response => {
         res.send(response)
