@@ -43,7 +43,7 @@ const  getRandomInt = (min, max) =>  {
 const clearDatabase = () => {
     let session = driver.session()
         // Clear the test database
-        return session.run('MATCH (args:Argument) DETACH DELETE (args)')
+        return session.run('MATCH (args) DETACH DELETE (args)')
         .then(() => {
             session.close()
         })

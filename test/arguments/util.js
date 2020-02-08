@@ -24,7 +24,7 @@ describe('Utility Argument functions', () => {
 
     after((done) => {
         // Clear the test database
-        session.run('MATCH (args:Argument) DETACH DELETE (args)')
+        session.run('MATCH (args) DETACH DELETE (args)')
         .then(() => {
             session.close()
             done()

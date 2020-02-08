@@ -37,6 +37,16 @@ let createdPost
 
 describe('Arguments', () => {
 
+    after((done) => {
+        let session = driver.session()
+        // Clear the test database
+        session.run('MATCH (args) DETACH DELETE (args)')
+        .then(() => {
+            session.close()
+            done()
+        })
+    })
+
 
     describe('/VOTE', () => {
 
@@ -59,16 +69,6 @@ describe('Arguments', () => {
                     res.should.have.status(200)
                     createPost()
                 });
-        })
-    
-        afterEach((done) => {
-            let session = driver.session()
-            // Clear the test database
-            session.run('MATCH (args:Argument) DETACH DELETE (args)')
-            .then(() => {
-                session.close()
-                done()
-            })
         })
 
         it('should add an up vote to an argument given a valid id', (done) => {
@@ -252,14 +252,8 @@ describe('Arguments', () => {
                 });
         });
 
-        const  getRandomInt = (min, max) =>  {
-            min = Math.ceil(min)
-            max = Math.floor(max)
-            return Math.floor(Math.random() * (max - min + 1)) + min
-        }
-
         it('should get the number correct of downvotes an argument has', (done) => {
-            const noOfDownvotes = getRandomInt(10, 40)
+            const noOfDownvotes = 24
             const downvote = (final) => {
                 testUser.uid += JSON.stringify(Math.random())
                 chai.request(server)
@@ -284,7 +278,7 @@ describe('Arguments', () => {
         });
 
         it('should get the number correct of upvotes an argument has', (done) => {
-            const noOfUpvotes = getRandomInt(10, 40)
+            const noOfUpvotes = 42
             const downvote = (final) => {
                 testUser.uid += JSON.stringify(Math.random())
                 chai.request(server)

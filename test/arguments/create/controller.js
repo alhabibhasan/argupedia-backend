@@ -32,7 +32,7 @@ describe('Arguments', () => {
     after((done) => {
         let session = driver.session()
         // Clear the test database
-        session.run('MATCH (args:Argument) DETACH DELETE (args)')
+        session.run('MATCH (args) DETACH DELETE (args)')
         .then(() => {
             session.close()
             done()
