@@ -34,10 +34,13 @@ const getRootArgChain = (rootId) => {
 
     return processLinkedResponse([rootNodePromise, rootNodeChainPromise], session)
     .then(nodesWithLinks => {
-        let labels = getNodeLabels(nodesWithLinks)
+        let voteFreeNodeWithLinks = removeVotes(nodesWithLinks)
+        let labels = getNodeLabels(voteFreeNodeWithLinks)
         nodesWithLinks.nodes.map(node => {
-            let label = labels[node.id]
-            node['status'] = label
+            if (node.type === 'Argument') {
+                let label = labels[node.id]
+                node['status'] = label
+            }
             return node
         })
 
