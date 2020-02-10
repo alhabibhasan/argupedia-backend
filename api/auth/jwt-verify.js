@@ -54,11 +54,12 @@ const jwtAuthMiddleware = (req, res, next) => {
     } else {
         let extractedToken = token.split('Bearer ')[1]
         verifyIdToken(extractedToken)
-        .then(uid => {
-            if (!uid) {
+        .then(decodedToken => {
+            if (!decodedToken) {
                 res.status(401)
                 res.send(ERR_MSG)
             } else {
+                req.body['validated_uid'] = decodedToken.user_id
                 next()
             }
         })
@@ -66,5 +67,5 @@ const jwtAuthMiddleware = (req, res, next) => {
 }
 
 module.exports = {
-    jwtAuthMiddleware
+    jwtAuthMiddleware,
 }
