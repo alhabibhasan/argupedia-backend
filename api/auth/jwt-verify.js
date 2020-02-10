@@ -12,7 +12,6 @@ const verifyIdToken = (idToken) => {
 
     let key = keyCache.get(KEY_ID)
     if (!key) {
-        console.log(`Key not stored in cache. Need to fetch it`)
         return getKey()
         .then(value => {
             key = value.body
@@ -21,7 +20,6 @@ const verifyIdToken = (idToken) => {
         })
         
     } else {
-        console.log(`Key stored in cache. We got this.`)
         return verify(idToken, key)
     }
 
