@@ -12,7 +12,7 @@ router.post('/up/:id', [validateId,
                         validParams, 
                         argumentExistsMiddleware, 
                         jwtAuthMiddleware], 
-(req, res, next) => {
+(req, res) => {
         upvote(req.params.id, req.body.uid)
         .then(response => {
             res.send(response)
@@ -24,7 +24,7 @@ router.post('/down/:id', [validateId,
                           validParams, 
                           argumentExistsMiddleware, 
                           jwtAuthMiddleware], 
-(req, res, next) => {
+(req, res) => {
     downvote(req.params.id, req.body.uid)
     .then(response => {
         res.send(response)
@@ -35,7 +35,7 @@ router.post('/:id', [validateId,
                      validateOptionalUid,
                      validParams, 
                      argumentExistsMiddleware], 
-(req, res, next) => {
+(req, res) => {
     getVotes(req.params.id, req.body.uid)
     .then(response => {
         res.send(response)
