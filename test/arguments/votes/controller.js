@@ -5,6 +5,8 @@ const server = require('../../../index')
 const should = chai.should();
 const assert = require('assert')
 const neo4j = require('neo4j-driver').v1
+const sinon = require('sinon');
+const jwt = require('jsonwebtoken');
 
 const driver = neo4j.driver(process.env.NEO_HOST, 
                             neo4j.auth.basic(process.env.NEO_USERNAME, 
@@ -32,10 +34,20 @@ let testUser = {
 }
 
 let createdPost
-
-
-
+let stub
+const fakeB64 = 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjYzZTllYThmNzNkZWExMTRkZWI5YTY0OTcxZDJhMjkzN2QwYzY3YWEiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiTXIgUm9ib3QiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EtL0FBdUU3bURPb3o4ZEpjRHJHX3d2Z1BpemVxVWwwVjdsZkJlQThPNm45eElDTEtvIiwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL2Z5cC1hcmd1cGVkaWEiLCJhdWQiOiJmeXAtYXJndXBlZGlhIiwiYXV0aF90aW1lIjoxNTgxMjc0NDAwLCJ1c2VyX2lkIjoiM2hEcVNFRUJ5aU1lVjJKTGxDUXRTb2o3QWtwMiIsInN1YiI6IjNoRHFTRUVCeWlNZVYySkxsQ1F0U29qN0FrcDIiLCJpYXQiOjE1ODEzNzAxMjIsImV4cCI6MTU4MTM3MzcyMiwiZW1haWwiOiJtdWhhbW1lZGFoYXNhbkBvdXRsb29rLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7Imdvb2dsZS5jb20iOlsiMTA5NjUzNjk5OTk0MTg4MDg2NTczIl0sImVtYWlsIjpbIm11aGFtbWVkYWhhc2FuQG91dGxvb2suY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.rulWmxbaorpe60hyj7_rMQfFeIgK-3v57Oys5REtVb-qa4dZL2-CSVykXQUoeKhwx45lSOH8ry_z8e2L07-UEUsurnFAIWnnz7lM6jtgMFHMY6ku7ICcrgepYZfKOojV1vD5mCXsZc-sY8YzTlc4_syEWd501Chi-8Qz1llSVh9M65ryDYxTdGwJJbN784lH36oyCqlrAW_wc5wmE1cZu3f81oFWK3Ee0DlFXTgGILGdpICgfSt7TJ9TtkJaD1wEBbeXtiapUl7HURSVOgqddjSqFEGLXqctLs0jE5NFMuCHIxg9OOcuMApBXzhvXBtbYPdCzWm_OsJhbMJOZcPxhg'
+const fakeSuccessTokenObject = {
+    success: 'Token is valid',
+    user_id: 'Fake user ID'
+}
 describe('Arguments', () => {
+
+    before((done) => {
+        stub = sinon.stub(jwt, 'verify').callsFake(() => {
+            return Promise.resolve(fakeSuccessTokenObject);
+        })
+        done()
+    })
 
     after((done) => {
         let session = driver.session()
@@ -74,6 +86,7 @@ describe('Arguments', () => {
         it('should add an up vote to an argument given a valid id', (done) => {
             chai.request(server)
                 .post('/api/arg/vote/up/' + createdPost.id)
+                .set('Authorization', 'Bearer ' + fakeB64) 
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
@@ -87,6 +100,7 @@ describe('Arguments', () => {
         it('should add a down vote to an argument given a valid id', (done) => {
             chai.request(server)
                 .post('/api/arg/vote/down/' + createdPost.id)
+                .set('Authorization', 'Bearer ' + fakeB64) 
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
@@ -100,6 +114,7 @@ describe('Arguments', () => {
         it('should give error message and return a flag if node with ID doesnt exist', (done) => {
             chai.request(server)
                 .post('/api/arg/vote/up/1233445678987654')
+                .set('Authorization', 'Bearer ' + fakeB64) 
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
@@ -115,6 +130,7 @@ describe('Arguments', () => {
         it('should give error message and return a flag if node with ID doesnt exist', (done) => {
             chai.request(server)
                 .post('/api/arg/vote/down/1234567890')
+                .set('Authorization', 'Bearer ' + fakeB64) 
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
@@ -130,12 +146,14 @@ describe('Arguments', () => {
         it('should delete the vote if the user votes in one way twice (toggle up)', (done) => {
             chai.request(server)
                 .post('/api/arg/vote/up/' + createdPost.id)
+                .set('Authorization', 'Bearer ' + fakeB64) 
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
 
                     chai.request(server)
                         .post('/api/arg/vote/up/' + createdPost.id)
+                        .set('Authorization', 'Bearer ' + fakeB64) 
                         .send(testUser)
                         .end((err, res) => {
                             res.should.have.status(200)
@@ -151,12 +169,14 @@ describe('Arguments', () => {
         it('should delete the vote if the user votes in one way twice (toggle down)', (done) => {
             chai.request(server)
                 .post('/api/arg/vote/down/' + createdPost.id)
+                .set('Authorization', 'Bearer ' + fakeB64) 
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
 
                     chai.request(server)
                         .post('/api/arg/vote/down/' + createdPost.id)
+                        .set('Authorization', 'Bearer ' + fakeB64) 
                         .send(testUser)
                         .end((err, res) => {
                             res.should.have.status(200)
@@ -173,12 +193,14 @@ describe('Arguments', () => {
         it('should replace up vote with down vote if you upvote and then downvote', (done) => {
             chai.request(server)
                 .post('/api/arg/vote/up/' + createdPost.id)
+                .set('Authorization', 'Bearer ' + fakeB64) 
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
                     assert.equal(res.body.voted, 'UP')
                     chai.request(server)
                         .post('/api/arg/vote/down/' + createdPost.id)
+                        .set('Authorization', 'Bearer ' + fakeB64) 
                         .send(testUser)
                         .end((err, res) => {
                             res.should.have.status(200)
@@ -194,12 +216,14 @@ describe('Arguments', () => {
         it('should replace down vote with up vote if you downvoted and then upvote', (done) => {
             chai.request(server)
                 .post('/api/arg/vote/down/' + createdPost.id)
+                .set('Authorization', 'Bearer ' + fakeB64) 
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
                     assert.equal(res.body.voted, 'DOWN')
                     chai.request(server)
                         .post('/api/arg/vote/up/' + createdPost.id)
+                        .set('Authorization', 'Bearer ' + fakeB64) 
                         .send(testUser)
                         .end((err, res) => {
                             res.should.have.status(200)
@@ -215,12 +239,14 @@ describe('Arguments', () => {
         it('should get the number of downvotes an argument has and the current users vote choice', (done) => {
             chai.request(server)
                 .post('/api/arg/vote/down/' + createdPost.id)
+                .set('Authorization', 'Bearer ' + fakeB64) 
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
                     assert.equal(res.body.voted, 'DOWN')
                     chai.request(server)
                         .post('/api/arg/vote/' + createdPost.id)
+                        .set('Authorization', 'Bearer ' + fakeB64) 
                         .send(testUser)
                         .end((err, res) => {
                             assert.equal(res.body.upvotes, 0)
@@ -235,12 +261,14 @@ describe('Arguments', () => {
         it('should get the number of upvotes an argument has and the current users vote choice', (done) => {
             chai.request(server)
                 .post('/api/arg/vote/up/' + createdPost.id)
+                .set('Authorization', 'Bearer ' + fakeB64) 
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
                     assert.equal(res.body.voted, 'UP')
                     chai.request(server)
                         .post('/api/arg/vote/' + createdPost.id)
+                        .set('Authorization', 'Bearer ' + fakeB64) 
                         .send(testUser)
                         .end((err, res) => {
                             assert.equal(res.body.downvotes, 0)
@@ -258,6 +286,7 @@ describe('Arguments', () => {
                 testUser.uid += JSON.stringify(Math.random())
                 chai.request(server)
                 .post('/api/arg/vote/down/' + createdPost.id)
+                .set('Authorization', 'Bearer ' + fakeB64) 
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
@@ -265,6 +294,7 @@ describe('Arguments', () => {
                     if (final) {
                         chai.request(server)
                             .post('/api/arg/vote/' + createdPost.id)
+                            .set('Authorization', 'Bearer ' + fakeB64) 
                             .send(testUser)
                             .end((err, res) => {
                                 res.should.have.status(200)
@@ -283,6 +313,7 @@ describe('Arguments', () => {
                 testUser.uid += JSON.stringify(Math.random())
                 chai.request(server)
                 .post('/api/arg/vote/up/' + createdPost.id)
+                .set('Authorization', 'Bearer ' + fakeB64) 
                 .send(testUser)
                 .end((err, res) => {
                     res.should.have.status(200)
@@ -290,6 +321,7 @@ describe('Arguments', () => {
                     if (final) {
                         chai.request(server)
                             .post('/api/arg/vote/' + createdPost.id)
+                            .set('Authorization', 'Bearer ' + fakeB64) 
                             .send(testUser)
                             .end((err, res) => {
                                 res.should.have.status(200)
