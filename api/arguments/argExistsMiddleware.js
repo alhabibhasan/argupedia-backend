@@ -16,9 +16,12 @@ const exists = (id) => {
         let exists, deleted, msg
         exists = arg.length
 
-        if (arg.length) {
+        let toReturn = {}
+
+        if (exists) {
             arg = createArgumentObject(arg[0])
             deleted = arg.deleted
+            toReturn['creatorUid'] = arg.creatorUID
         }
 
         exists = Boolean(exists)
@@ -32,9 +35,11 @@ const exists = (id) => {
             msg = 'This message has been deleted'
         }
 
-        return Promise.resolve({
-            exists, deleted, msg
-        })
+        toReturn['exists'] = exists
+        toReturn['deleted'] = deleted
+        toReturn['msg'] = msg
+
+        return Promise.resolve(toReturn)
     })
     .catch(err => {
         throw err
