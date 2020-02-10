@@ -1,5 +1,4 @@
 const {unwrapResult, createArgumentObject} = require('./read/util/argHelpers')
-const {validateId, validateParams} = require('./validation')
 
 const neo4j = require('neo4j-driver').v1
 const driver = neo4j.driver(process.env.NEO_HOST, neo4j.auth.basic(process.env.NEO_USERNAME, process.env.NEO_PASS))
