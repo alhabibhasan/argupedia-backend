@@ -29,7 +29,7 @@ const getRootArgChain = (rootId) => {
 
     const rootNodeCypher = `MATCH (root:Argument) 
                             WHERE ID(root) = toInteger($rootId)
-                            RETURN root {.*, id: ID(root)}`
+                            RETURN root {.*, id: ID(root), type:labels(root)[0]}`
     let rootNodePromise = session.run(rootNodeCypher, {rootId: rootId})
 
     return processLinkedResponse([rootNodePromise, rootNodeChainPromise], session)
