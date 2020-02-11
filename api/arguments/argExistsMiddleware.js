@@ -63,5 +63,5 @@ const argumentExistsMiddleware = (req, res, next) => {
 
 module.exports = {
     argumentExistsMiddleware,
-    exists // for testing
+    exists 
 }
