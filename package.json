@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test mocha --recursive",
+    "test": "NODE_ENV=test nyc --reporter=html --reporter=text mocha --recursive --exit",
     "start": "NODE_ENV=dev nodemon index.js"
   },
   "author": "",
@@ -26,6 +26,8 @@
     "chai-http": "^4.3.0",
     "custom-env": "^1.0.2",
     "mocha": "^7.0.1",
+    "node-mocks-http": "^1.8.1",
+    "nyc": "^15.0.0",
     "sinon": "^8.1.1",
     "underscore": "^1.9.2"
   }
