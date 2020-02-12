@@ -1,7 +1,5 @@
-
 const neo4j = require('neo4j-driver').v1
 const driver = neo4j.driver(process.env.NEO_HOST, neo4j.auth.basic(process.env.NEO_USERNAME, process.env.NEO_PASS))
-const session = driver.session()
 const {unwrapResult} = require('../arguments/read/util/argHelpers')
 
 const createUser = (user) => {
@@ -33,8 +31,10 @@ const createUser = (user) => {
                 'err' : 'User with uid ' + uid + ' already exists.'
             }
         } else if (!check.userExists) {
+            const session = driver.session()
             return session.run(cypherToCreateUser, {uid,email, displayName, createdAt,updatedAt})
             .then(userResponse => {
+                session.close()
                 let user = unwrapResult(userResponse)[0]
                 let userToReturn = {
                     nodeId: neo4j.integer.toNumber(user.identity),
@@ -56,8 +56,10 @@ const checkIfUserExists = (userId) => {
     const cypher = `MATCH (user:User) 
                     WHERE user.uid = $userId 
                     RETURN COUNT(user)`
+    const session = driver.session()
     return session.run(cypher, {userId})
     .then(response => {
+        session.close()
         let userExists = unwrapResult(response)[0]
         let count = neo4j.integer.toNumber(userExists)
         return count > 0
