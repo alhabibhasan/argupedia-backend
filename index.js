@@ -8,9 +8,11 @@ const bodyParser = require('body-parser')
 const SWITCH_PORT_IF_IN_USE = process.env.SWITCH_PORT_IF_IN_USE
 
 const api = require('./api/routes')
+const admin = require('./admin/index')
 
 app.use(bodyParser.json())
-
+app.set('view engine', 'pug')
+app.use('/admin', cors(), admin)
 app.use('/api', cors(), api)
 
 const handlePortError = (err) => {

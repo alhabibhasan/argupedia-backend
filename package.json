@@ -15,11 +15,13 @@
     "dotenv": "^8.1.0",
     "express": "^4.17.1",
     "express-validator": "^6.2.0",
+    "firebase": "^7.8.1",
     "jsonwebtoken": "^8.5.1",
     "neo4j-driver": "^1.7.6",
     "node-cache": "^5.1.0",
     "promisify": "0.0.3",
     "prompt-confirm": "^2.0.4",
+    "pug": "^2.0.4",
     "request": "^2.88.0"
   },
   "devDependencies": {

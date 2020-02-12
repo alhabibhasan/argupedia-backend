@@ -1,0 +1,83 @@
+extends index.pug
+
+block content
+
+    form(method='POST' action="/admin/dashboard/add-argument-schema")
+        p(id='message')
+        p
+            label Name:
+            input(type='text' placeholder='What is the scheme called' name='name' id='schemeName' required='true')
+        p
+            label Critical question:
+            input(type='text' placeholder='What is the scheme called' id='criticalQ' name='name')
+            button(type='button' id='addCriticalQ') Add 
+        p
+            input(type='hidden' id='scheme' name='scheme')
+
+        ul(id='criticalQList')
+
+        button(type='submit' id='submitScheme') Add
+
+    script.
+        let addQButton = window.document.getElementById('addCriticalQ')
+        addQButton.addEventListener('click' , (e) => {
+            let criticalQ = window.document.getElementById('criticalQ')
+            if (criticalQ.value.length > 0) {
+
+                let criticalQList = window.document.getElementById('criticalQList')
+                let li = document.createElement("li");
+                let span = document.createElement("span")
+                let div = document.createElement("div")
+                let removeButton = document.createElement("button")
+
+                span.innerHTML = criticalQ.value
+                removeButton.innerHTML = 'Delete'
+                removeButton.type = 'button'
+                removeButton.qIndex = criticalQList.children.length
+                removeButton.onclick = (e) => {
+                    criticalQList.removeChild(criticalQList.childNodes[e.target.qIndex])
+                }
+
+                div.appendChild(span)
+                div.appendChild(removeButton)
+                li.appendChild(div)
+                criticalQList.appendChild(li)
+                criticalQ.value = ''
+            }
+        })
+
+        let submitButton = window.document.getElementById('submitScheme')
+        submitButton.addEventListener('click' , (e) => {
+            
+            let name = window.document.getElementById('schemeName')
+            let list = window.document.getElementById('criticalQList')
+            let questions = getQuestions(list)
+
+            if (questions.length === 0) {
+                e.preventDefault()
+                showMessage('Please supply some critical questions')
+            } else {
+                showMessage('')
+                let scheme = {
+                    name: name.value,
+                    criticalQuestions: getQuestions(list)
+                }
+                let hiddenField = window.document.getElementById('scheme')
+                hiddenField.value = JSON.stringify(scheme)
+            }
+        })
+
+
+        let getQuestions = (list) => {
+            let spans =list.querySelectorAll('span')
+            let arr = []
+            for (let i = 0; i < spans.length; i++) {
+                arr.push(spans[i].innerHTML)
+            }
+            return arr
+        }
+
+        let showMessage = (message) => {
+            let messageField = window.document.getElementById('message')
+            messageField.innerHTML = message
+        }

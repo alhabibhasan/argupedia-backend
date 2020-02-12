@@ -1,0 +1,19 @@
+extends index.pug
+
+block content
+    p In order to continue, you will need to login.
+    p 
+        | To create an account, you will need to sign up via email using the Argupedia 
+        | application and then request to be made an admin (send requests to dev team) 
+
+    form(method='POST' action="/admin/login")
+        p
+            label Email:
+            input(type='email', placeholder='admin@argupedia.com', name='email', required='true')  
+        p
+            label Password:
+            input(type='password', placeholder='Password', name='password', required='true')  
+        button(type='submit') Login
+
+    div
+        p Passwords can be reset using the Argupedia application

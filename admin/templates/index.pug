@@ -1,0 +1,15 @@
+html
+    head
+        title Argupedia Admin Panel #{title}
+
+    body
+        h2 Welcome to admin services        
+        p #{message}
+        p
+            #user 
+                if user
+                    a(href='/admin/logout') Logout
+                else 
+                    a(href='/admin/login') Login
+
+        block content
