@@ -47,15 +47,17 @@ const markRemainingNodes = (markedNodes, nodeStatusMap) => {
         })
 
         if (markedAttackers > (noOfAttackers / 2)) {
-            if (noAttackersOut > noAttackersIn) {
-                arg.node.status = IN
-                nodeStatusMap[arg.node.id] = IN
-            } else if (noAttackersIn > noAttackersOut) {
-                arg.node.status = OUT
-                nodeStatusMap[arg.node.id] = OUT
-            } else {
+            if (noAttackersIn === 0 && (noAttackersOut < noOfAttackers)) {
                 arg.node.status = UNDECIDED
                 nodeStatusMap[arg.node.id] = UNDECIDED
+            } else {
+                if (noAttackersOut === noOfAttackers) {
+                    arg.node.status = IN
+                    nodeStatusMap[arg.node.id] = IN
+                } else if (noAttackersIn > 0) {
+                    arg.node.status = OUT
+                    nodeStatusMap[arg.node.id] = OUT
+                }
             }
         }
 
