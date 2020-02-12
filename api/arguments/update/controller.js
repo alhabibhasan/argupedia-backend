@@ -14,7 +14,8 @@ router.patch('/:id', [validateId,
                       validateArg, 
                       validParams,
                       jwtAuthMiddleware, 
-                      argumentExistsMiddleware], (req, res, next) => {
+                      argumentExistsMiddleware,
+                      userCreatedPostMiddleware], (req, res) => {
     updateArgument(req, res)
 })
 
@@ -27,7 +28,7 @@ router.patch('/response/:id', [validateId,
                                argumentExistsMiddleware,
                                jwtAuthMiddleware,
                                userCreatedPostMiddleware ], 
-(req, res, next) => {
+(req, res) => {
     updateArgument(req, res)
 })
 

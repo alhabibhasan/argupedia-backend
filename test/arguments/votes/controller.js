@@ -5,8 +5,8 @@ const server = require('../../../index')
 const should = chai.should();
 const assert = require('assert')
 const neo4j = require('neo4j-driver').v1
-const sinon = require('sinon');
-const jwt = require('jsonwebtoken');
+const sinon = require('sinon')
+const jwt = require('jsonwebtoken')
 
 const driver = neo4j.driver(process.env.NEO_HOST, 
                             neo4j.auth.basic(process.env.NEO_USERNAME, 
@@ -50,6 +50,7 @@ describe('Arguments', () => {
     })
 
     after((done) => {
+        sinon.restore()
         let session = driver.session()
         // Clear the test database
         session.run('MATCH (args) DETACH DELETE (args)')
