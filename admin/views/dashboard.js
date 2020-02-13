@@ -1,7 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const {check} = require('express-validator');
-const {addScheme, getSchemes} = require('./argumentSchemes')
+const {addScheme, getSchemes, getScheme, editScheme, deleteScheme} = require('./argumentSchemes')
+const validParams = require('../../api/util/validate-argument')
 const validateInput = [
     check('scheme')
         .isString({min:10}).withMessage('Needs to be a string')
@@ -12,16 +13,17 @@ const {getTemplate} = require('../util')
 router.get('/', (req, res, next) => {
     res.render(getTemplate('/templates/dashboard.pug'), 
         {
-            // message: `Welcome ${req.user.displayName}`, 
+            message: `Welcome ${req.user.displayName}`, 
             user: req.user 
         }
     )
 })
 
 router.get('/add-argument-schemes', (req, res, next) => {
-    res.render(getTemplate('/templates/addArgumentSchemes.pug'), 
-        {
-            user: req.user 
+    res.render(getTemplate('/templates/addArgumentSchemes.pug'), {
+            user: req.user,
+            edit: false,
+            route: '/admin/dashboard/scheme/add'
         }
     )
 })
@@ -29,16 +31,12 @@ router.get('/add-argument-schemes', (req, res, next) => {
 router.get('/view-argument-schemes', (req, res, next) => {
     getSchemes()
     .then(response => {
-        res.render(getTemplate('/templates/viewArgumentSchemes.pug'), 
-        {
-            user: req.user,
-            schemes: response
-        }
-    )
+        res.render(getTemplate('/templates/viewArgumentSchemes.pug'), { user: req.user, schemes: response})
     })
 })
 
-router.post('/add-argument-schemes', [validateInput],(req, res, next) => {
+
+router.post('/scheme/add', [validateInput, validParams],(req, res, next) => {
     let scheme = JSON.parse(req.body.scheme)
     if (scheme.name.length && scheme.criticalQuestions.length) {
         addScheme({
@@ -53,8 +51,56 @@ router.post('/add-argument-schemes', [validateInput],(req, res, next) => {
     }
 })
 
-router.get('/scheme/edit/:scheme', [validateInput],(req, res, next) => {
-    res.send(req.params.scheme)
+router.get('/scheme/edit/:scheme', [validateInput, validParams],(req, res, next) => {
+    getScheme(req.params.scheme)
+    .then(scheme => {
+        let questions = scheme.criticalQuestions.map(q => {
+            return {
+                question: q
+            }
+        })
+        res.render(getTemplate('/templates/addArgumentSchemes.pug'), {
+            label: scheme.label, 
+            cqs: questions,
+            edit: true,
+            route: '/admin/dashboard/scheme/edit/' + req.params.scheme
+        })
+    })
+})
+
+router.post('/scheme/edit/:scheme', [validateInput, validParams],(req, res, next) => {
+    let scheme = JSON.parse(req.body.scheme)
+    let id = req.params.scheme
+
+    if (!scheme.name || scheme.criticalQuestions.length === 0) {
+        res.send('You need to supply all fields')
+    } else {
+        editScheme(id, {
+            label: scheme.name,
+            criticalQuestions: scheme.criticalQuestions
+        })
+        .then(() => {
+            res.send('Updated, here are the new values ' + scheme.name + ' ' + scheme.criticalQuestions)
+        })
+    }
+})
+
+router.get('/scheme/delete/:scheme', [validateInput, validParams],(req, res, next) => {
+    let id = req.params.scheme
+    getScheme(id)
+    .then(scheme => {
+        res.render(getTemplate('/templates/confirmDelete.pug'), {
+            id: [id],
+            label: scheme.label,
+            criticalQuestions: scheme.criticalQuestions
+        })
+    })
+})
+
+router.get('/scheme/delete/confirm/:scheme', [validateInput, validParams],(req, res, next) => {
+    let id = req.params.scheme
+    deleteScheme(id)
+    .then(resp => res.send('Deleted'))
 })
 
 

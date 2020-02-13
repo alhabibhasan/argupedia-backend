@@ -19,13 +19,13 @@ router.use(express.urlencoded({ extended: true }))
 
 router.get('/login', [checkLoggedIn], (req, res) => {
     if (req.user) {
-        res.redirect('/admin/dashboard', {user: req.user})
+        res.render(getTemplate('/templates/dashboard.pug'), {user: req.user})
     } else {
         res.render(getTemplate('/templates/login.pug', {user: req.user}))
     }
 })
 
-router.get('/', (req, res) => {
+router.get('/', [checkLoggedIn] ,(req, res) => {
     res.render(getTemplate('/templates/index.pug', {user: req.user}))
 })
 
@@ -62,11 +62,10 @@ router.post('/login', [validateCred] , (req, res) => {
 router.get('/logout', [validateCred] , (req, res) => {
     firebase.auth().signOut()
     .then(() => {
-        // Need to check if user is an admin in neo db
         res.redirect('/admin/')
     })
 })
 
-router.use('/dashboard', [/*redirectIfLoggedOut*/], dashboard)
+router.use('/dashboard', [redirectIfLoggedOut], dashboard)
 
 module.exports = router

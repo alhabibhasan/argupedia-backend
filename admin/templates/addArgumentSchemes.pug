@@ -2,7 +2,19 @@ extends index.pug
 
 block content
 
-    form(method='POST' action="/admin/dashboard/add-argument-schemes")
+    div
+        script.
+            let formSubmitUrl = "#{route}"
+            let EXISTING_LABEL = "#{label}"
+            let EXISTING_CQS = []
+        #label
+        if label
+            each question in cqs
+                script. 
+                    currentQ = "#{question.question}"
+                    EXISTING_CQS.push(currentQ)
+
+    form(method='POST' id='form')
         p(id='message')
         p
             label Name:
@@ -16,34 +28,53 @@ block content
 
         ul(id='criticalQList')
 
-        button(type='submit' id='submitScheme') Add
+        #edit
+        if edit
+            button(type='submit' id='submitScheme') Update
+        else 
+            button(type='submit' id='submitScheme') Add
 
     a(href='/admin/dashboard') Back
 
     script.
+        let form = window.document.getElementById('form')
+        form.action = formSubmitUrl
+        console.log(form)
+
+        let addValToList = (val) => {
+            let criticalQList = window.document.getElementById('criticalQList')
+            let li = document.createElement("li");
+            let span = document.createElement("span")
+            let div = document.createElement("div")
+            let removeButton = document.createElement("button")
+
+            span.innerHTML = val
+            removeButton.innerHTML = 'Delete'
+            removeButton.type = 'button'
+            removeButton.qIndex = criticalQList.children.length
+            removeButton.onclick = (e) => {
+                // we are in a div and then an li
+                e.target.parentNode.parentNode.remove()
+            }
+
+            div.appendChild(span)
+            div.appendChild(removeButton)
+            li.appendChild(div)
+            criticalQList.appendChild(li)
+        }
+
+
+        if (EXISTING_LABEL && EXISTING_CQS) {
+            let schemeName = window.document.getElementById('schemeName')
+            schemeName.value = EXISTING_LABEL
+            EXISTING_CQS.forEach(q => addValToList(q))
+        }
+        
         let addQButton = window.document.getElementById('addCriticalQ')
         addQButton.addEventListener('click' , (e) => {
             let criticalQ = window.document.getElementById('criticalQ')
             if (criticalQ.value.length > 0) {
-
-                let criticalQList = window.document.getElementById('criticalQList')
-                let li = document.createElement("li");
-                let span = document.createElement("span")
-                let div = document.createElement("div")
-                let removeButton = document.createElement("button")
-
-                span.innerHTML = criticalQ.value
-                removeButton.innerHTML = 'Delete'
-                removeButton.type = 'button'
-                removeButton.qIndex = criticalQList.children.length
-                removeButton.onclick = (e) => {
-                    criticalQList.removeChild(criticalQList.childNodes[e.target.qIndex])
-                }
-
-                div.appendChild(span)
-                div.appendChild(removeButton)
-                li.appendChild(div)
-                criticalQList.appendChild(li)
+                addValToList(criticalQ.value)
                 criticalQ.value = ''
             }
         })
@@ -68,7 +99,6 @@ block content
                 hiddenField.value = JSON.stringify(scheme)
             }
         })
-
 
         let getQuestions = (list) => {
             let spans =list.querySelectorAll('span')

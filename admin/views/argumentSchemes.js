@@ -34,8 +34,20 @@ const editScheme = (id, newScheme) => {
     return database.ref('/schemes/' + id).update(newScheme)
 }
 
+const getScheme = (id) => {
+    return database.ref('/schemes/' + id).once('value').then(snapshot => {
+        return snapshot.val()
+    })
+}
+
+const deleteScheme = (id) => {
+    return database.ref('/schemes/' + id).remove()
+}
+
 module.exports = {
     addScheme,
     getSchemes,
-    editScheme
+    editScheme,
+    getScheme,
+    deleteScheme
 }
