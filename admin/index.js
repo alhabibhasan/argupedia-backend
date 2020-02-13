@@ -5,7 +5,7 @@ const {firebase} = require('./firebase/firebase')
 const {check} = require('express-validator');
 const authErrorMessage = require('./firebase/authErrorMessages').errorMessages
 const {redirectIfLoggedOut, checkLoggedIn} = require('./firebase/authMiddleware')
-
+const {isUserAdmin} = require('../api/users/users')
 const dashboard = require('./views/dashboard').router
 
 const validateCred = [
@@ -35,9 +35,21 @@ router.post('/login', [validateCred] , (req, res) => {
     firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE)
     .then(() => {
         return firebase.auth().signInWithEmailAndPassword(email, password)
-        .then(() => {
-            // Need to check if user is an admin in neo db
-            res.redirect('/admin/dashboard')
+        .then((cred) => {
+            if (cred) {
+                isUserAdmin(cred.user.uid)
+                .then(response => {
+                    if (!response.admin) {
+                        res.render(getTemplate('/templates/login.pug'), {message: 'You are not an admin.'})
+                    } else {
+                        res.redirect('/admin/dashboard')
+                    }
+                }) 
+                .catch(err => console.log(err))
+            } else {
+                res.render(getTemplate('/templates/login.pug'), {message: 'Incorrect details provided.'})
+            }
+            
         })
     })
     .catch(err => {

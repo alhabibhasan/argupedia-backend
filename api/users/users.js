@@ -68,7 +68,24 @@ const checkIfUserExists = (userId) => {
     })
 }
 
+const isUserAdmin = (userId) => {
+    if (!userId || !userId.length) return Promise.reject({err: 'ERROR: UID must not be empty or null.'})
+    const cypher = `MATCH (user:User) 
+                    WHERE user.uid = $userId 
+                    RETURN user {admin: user.admin}`
+    const session = driver.session()
+    return session.run(cypher, {userId})
+    .then(response => {
+        session.close()
+        let isAdmin = unwrapResult(response)[0]
+        return isAdmin
+    }).catch(err => {
+        throw err
+    })
+}
+
 module.exports = {
     createUser,
-    checkIfUserExists
+    checkIfUserExists,
+    isUserAdmin
 }
