@@ -5,7 +5,16 @@ const getSchemes = () => {
     return database.ref('/').once('value')
     .then(snapshot => {
         let values = snapshot.val()
-        return values
+        let formattedValues = []
+        for (let field in values.schemes) {
+            let record = {
+                id: field,
+                label: values.schemes[field].label,
+                criticalQuestions:  values.schemes[field].criticalQuestions,
+            }
+            formattedValues.push(record)
+        }
+        return formattedValues
     })
 }
 
@@ -21,7 +30,12 @@ const addScheme = (scheme) => {
     })
 }
 
+const editScheme = (id, newScheme) => {
+    return database.ref('/schemes/' + id).update(newScheme)
+}
+
 module.exports = {
     addScheme,
-    getSchemes
+    getSchemes,
+    editScheme
 }

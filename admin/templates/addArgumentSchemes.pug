@@ -2,7 +2,7 @@ extends index.pug
 
 block content
 
-    form(method='POST' action="/admin/dashboard/add-argument-schema")
+    form(method='POST' action="/admin/dashboard/add-argument-schemes")
         p(id='message')
         p
             label Name:
@@ -17,6 +17,8 @@ block content
         ul(id='criticalQList')
 
         button(type='submit' id='submitScheme') Add
+
+    a(href='/admin/dashboard') Back
 
     script.
         let addQButton = window.document.getElementById('addCriticalQ')
