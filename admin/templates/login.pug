@@ -1,0 +1,35 @@
+extends index.pug
+
+block content
+    style.
+        .login {
+            display: grid;
+            grid-template-columns: auto auto;
+        } 
+        .image {
+            overflow: hidden;
+            height: 100vh;
+            max-width: 100%;
+        }
+
+    div.login
+        div.content
+            h2.light In order to continue, you will need to login.
+            p 
+                | To create an account, you will need to sign up via email using the Argupedia 
+                | application and then request to be made an admin (send requests to dev team) 
+
+            form(method='POST' action="/admin/login")
+                div.form-group
+                    p
+                        label Email:
+                        input.form-control(type='email', placeholder='admin@argupedia.com', name='email', required='true')  
+                    p
+                        label Password:
+                        input.form-control(type='password', placeholder='Password', name='password', required='true')  
+                    button.btn.btn-primary(type='submit') Login
+
+                p Passwords can be reset using the Argupedia application
+
+        div.image
+            img(src='/public/images/clear-sky.jpg')

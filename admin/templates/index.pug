@@ -1,0 +1,46 @@
+html
+    head
+        meta(name='viewport', content='width=device-width, initial-scale=1.0')
+        link(rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css')
+        style(type='text/css').
+            body {
+                font-weight: 200;
+                overflow: hidden;
+            }
+            .light {
+                font-weight: 200;
+            }
+            .content {
+                margin: 10% 1% 10% 1%;
+                width: 60%;
+                margin-left: 10%;
+            }
+            @media only screen and (max-width: 600px) {
+            .image {
+                display: none;
+            }
+
+            .content {
+                margin: 10% 1% 10% 1%;
+                width: 60%;
+                margin-left: 10%;
+            }
+        title Argupedia Admin Panel #{title}
+
+    body
+        nav.navbar.navbar-expand-lg.navbar-light.bg-light 
+            a.navbar-brand(href="/admin") Welcome to admin services    
+            a.nav-link(href='/admin/') Home
+            #user 
+                if user
+                    a(href='/admin/logout') Logout
+                else 
+                    a(href='/admin/login') Login
+
+        block content
+            p #{message}
+            div.jumbotron
+                h1.light Add new motivations schemes and more using this service.
+
+
+    script(src='/https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js')

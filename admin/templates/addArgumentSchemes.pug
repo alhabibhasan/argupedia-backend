@@ -1,0 +1,179 @@
+extends index.pug
+
+block content
+    style. 
+        .addScheme {
+            margin-left: 5%;
+            margin-top: -10%;
+        }
+        .delete-button {
+            margin: 0 0 0 10px;
+            float: right;
+        }
+        .add-to-list {
+            margin: 5% 0 0 3%;
+        }
+        .input-fields {
+            width: 80%;
+            margin: 0 3% 0 3%;
+        }
+        .input-label {
+            font-size: 16pt;
+            width: 60%;
+            margin: 0 3% 0 3%;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .input-fields {
+                margin: 0 3% 0 3%;
+                width: 90vw;
+            }
+
+            .form {
+            }
+        }
+
+        .submit {
+            width: 65%;
+            margin: 0 3% 0 3%;
+        }
+        .cancel {
+            margin: 0 3% 0 3%;
+        }
+        .list {
+            margin: 0 3% 1% 3%;
+            height: 30%;
+            overflow: scroll;
+        }
+        .list-item {
+            width: 60%;
+        }
+        .form {
+            margin-top: 5%;
+            width: 50%;
+            position: absolute;
+            left: 0;
+            height: 100%;
+        }
+        .image {
+            width: 50%;
+            position: absolute;
+            right: 0;
+            height: 100vh;
+        }
+    div.content.addScheme
+        script.
+            let formSubmitUrl = "#{route}"
+            let EXISTING_LABEL = "#{label}"
+            let EXISTING_CQS = []
+        #label
+        if label
+            each question in cqs
+                script. 
+                    currentQ = "#{question.question}"
+                    EXISTING_CQS.push(currentQ)
+    p.form.input-fields.light #{message}
+    div.form
+        form(method='POST' id='form')
+            div.form-group
+                p.add-to-list.text-danger(id='message')
+                p
+                    label.input-label Name:
+                    input.form-control.input-fields(type='text' placeholder='What is the scheme called?' name='name' id='schemeName' required='true')
+                p
+                    label.input-label Critical question:
+                    input.form-control.input-fields(type='text' placeholder='What is the critical question?' id='criticalQ' name='name')
+                    button.btn.btn-secondary.add-to-list(type='button' id='addCriticalQ') Add question 
+                p
+                    input(type='hidden' id='scheme' name='scheme')
+
+                ul.list.list-group(id='criticalQList')
+
+                #edit
+                if edit
+                    button.btn.btn-primary.submit(type='submit' id='submitScheme') Update
+                else 
+                    button.btn.btn-primary.submit(type='submit' id='submitScheme') Add
+
+            a.cancel(href='/admin/dashboard') Back
+
+    div.image 
+        img(src='/public/images/clear-sky.jpg')
+    script.
+        let form = window.document.getElementById('form')
+        form.action = formSubmitUrl
+
+        let addValToList = (val) => {
+            let criticalQList = window.document.getElementById('criticalQList')
+            let li = document.createElement("li");
+            let span = document.createElement("span")
+            let div = document.createElement("div")
+            let removeButton = document.createElement("button")
+
+            span.innerHTML = val
+            removeButton.innerHTML = '&#10005;'
+            removeButton.classList.add('btn','btn-danger', 'delete-button') 
+            removeButton.type = 'button'
+            removeButton.qIndex = criticalQList.children.length
+            removeButton.onclick = (e) => {
+                // we are in a div and then an li
+                e.target.parentNode.parentNode.remove()
+            }
+            li.classList.add('list-group-item', 'list-item')
+
+            div.appendChild(span)
+            div.appendChild(removeButton)
+            li.appendChild(div)
+            criticalQList.appendChild(li)
+        }
+
+
+        if (EXISTING_LABEL && EXISTING_CQS) {
+            let schemeName = window.document.getElementById('schemeName')
+            schemeName.value = EXISTING_LABEL
+            EXISTING_CQS.forEach(q => addValToList(q))
+        }
+        
+        let addQButton = window.document.getElementById('addCriticalQ')
+        addQButton.addEventListener('click' , (e) => {
+            let criticalQ = window.document.getElementById('criticalQ')
+            if (criticalQ.value.length > 0) {
+                addValToList(criticalQ.value)
+                criticalQ.value = ''
+            }
+        })
+
+        let submitButton = window.document.getElementById('submitScheme')
+        submitButton.addEventListener('click' , (e) => {
+            
+            let name = window.document.getElementById('schemeName')
+            let list = window.document.getElementById('criticalQList')
+            let questions = getQuestions(list)
+
+            if (questions.length === 0) {
+                e.preventDefault()
+                showMessage('Please supply some critical questions')
+            } else {
+                showMessage('')
+                let scheme = {
+                    name: name.value,
+                    criticalQuestions: getQuestions(list)
+                }
+                let hiddenField = window.document.getElementById('scheme')
+                hiddenField.value = JSON.stringify(scheme)
+            }
+        })
+
+        let getQuestions = (list) => {
+            let spans =list.querySelectorAll('span')
+            let arr = []
+            for (let i = 0; i < spans.length; i++) {
+                arr.push(spans[i].innerHTML)
+            }
+            return arr
+        }
+
+        let showMessage = (message) => {
+            let messageField = window.document.getElementById('message')
+            messageField.innerHTML = message
+        }

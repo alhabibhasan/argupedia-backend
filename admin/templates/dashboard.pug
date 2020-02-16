@@ -1,0 +1,35 @@
+extends index.pug
+
+
+block content
+    style. 
+        .dashboard {
+            margin-left: 5%;
+            font-size: 16pt;
+            width: 50%;
+            position: absolute;
+            left: 0px;
+            height: 100%;
+        }
+        .image {
+            width: 50%;
+            position: absolute;
+            right: 0px;
+            max-height: 100vh;
+        }
+
+    div.content.dashboard
+        h2.light Welcome to the admin dashboard
+
+        div
+            p Available actions:
+            div
+                p
+                    a(href='/admin/dashboard/schemes/add') Add argument scheme (WIP)
+                p
+                    a(href='/admin/dashboard/schemes/view') View all schemes
+                p
+                    a(href='#') Manage users (coming soon!)
+
+    div.image
+        img(src='/public/images/clear-sky.jpg')
