@@ -19,7 +19,7 @@ router.get('/', (req, res, next) => {
     )
 })
 
-router.get('/add-argument-schemes', (req, res, next) => {
+router.get('/schemes/add', (req, res, next) => {
     res.render(getTemplate('/templates/addArgumentSchemes.pug'), {
             user: req.user,
             edit: false,
@@ -28,7 +28,7 @@ router.get('/add-argument-schemes', (req, res, next) => {
     )
 })
 
-router.get('/view-argument-schemes', (req, res, next) => {
+router.get('/schemes/view', (req, res, next) => {
     getSchemes()
     .then(response => {
         res.render(getTemplate('/templates/viewArgumentSchemes.pug'), { user: req.user, schemes: response})
@@ -54,17 +54,21 @@ router.post('/scheme/add', [validateInput, validParams],(req, res, next) => {
 router.get('/scheme/edit/:scheme', [validateInput, validParams],(req, res, next) => {
     getScheme(req.params.scheme)
     .then(scheme => {
-        let questions = scheme.criticalQuestions.map(q => {
-            return {
-                question: q
-            }
-        })
-        res.render(getTemplate('/templates/addArgumentSchemes.pug'), {
-            label: scheme.label, 
-            cqs: questions,
-            edit: true,
-            route: '/admin/dashboard/scheme/edit/' + req.params.scheme
-        })
+        if (scheme) {
+            let questions = scheme.criticalQuestions.map(q => {
+                return {
+                    question: q
+                }
+            })
+            res.render(getTemplate('/templates/addArgumentSchemes.pug'), {
+                label: scheme.label, 
+                cqs: questions,
+                edit: true,
+                route: '/admin/dashboard/scheme/edit/' + req.params.scheme
+            })
+        } else {
+            res.send('This scheme doesnt exist.')
+        }
     })
 })
 
@@ -89,18 +93,22 @@ router.get('/scheme/delete/:scheme', [validateInput, validParams],(req, res, nex
     let id = req.params.scheme
     getScheme(id)
     .then(scheme => {
-        res.render(getTemplate('/templates/confirmDelete.pug'), {
-            id: [id],
-            label: scheme.label,
-            criticalQuestions: scheme.criticalQuestions
-        })
+        if (scheme) {
+            res.render(getTemplate('/templates/confirmDelete.pug'), {
+                id: [id],
+                label: scheme.label,
+                criticalQuestions: scheme.criticalQuestions
+            })
+        } else {
+            res.send('This scheme doesnt exist.')
+        }
     })
 })
 
 router.get('/scheme/delete/confirm/:scheme', [validateInput, validParams],(req, res, next) => {
     let id = req.params.scheme
     deleteScheme(id)
-    .then(resp => res.send('Deleted'))
+    .then(resp => res.render(getTemplate('/templates/deleted.pug')))
 })
 
 

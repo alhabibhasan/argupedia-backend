@@ -1,20 +1,45 @@
 extends index.pug
 
 block content
-
-    div
-        p
+    style. 
+        .list-view {
+            margin: 3% 5% 0 3%;
+            max-height: 70vh;
+            overflow: scroll;
+        }
+        .list-item {
+            margin-bottom: 3%;
+            margin-top: 3%;
+            background-color: #ededed;
+        }
+        .action {
+            margin-right: 2%;
+            margin-top: 2%;
+        }
+        .action-group {
+            padding-right: 5%;
+        }
+        .label {
+            font-size: 15pt;
+        }
+        .cancel {
+            margin: 0 0 3% 3%;
+        }
+    h2.light.list-view
             | Here are the current saved schemes
+    div.list-view
         div
             each val in schemes
-                div= val.label
-                    each question in val.criticalQuestions
-                        li= question
-                div
-                    a(href='/admin/dashboard/scheme/edit/' + val.id) Edit
-                    a(href='/admin/dashboard/scheme/delete/' + val.id) Delete
+                div.list-item
+                    div= val.label
+                        each question in val.criticalQuestions
+                            li= question
+                    div.action-group
+                        a.btn.btn-info.action(href='/admin/dashboard/scheme/edit/' + val.id) Edit
+                        a.btn.btn-warning.action(href='/admin/dashboard/scheme/delete/' + val.id) Delete
+                    hr
                 
 
-    a(href='/admin/dashboard') Back
+    a.btn.cancel(href='/admin/dashboard') Back
 
     script.
