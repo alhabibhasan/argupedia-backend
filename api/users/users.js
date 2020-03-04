@@ -84,8 +84,52 @@ const isUserAdmin = (userId) => {
     })
 }
 
+const getUser = (userId) => {
+    return checkIfUserExists(userId) // this does userID validation for us
+    .then(exists => {
+        if (exists) {
+            const getUserCypher = `MATCH (u:User) 
+                                   WHERE u.uid = $userId 
+                                   RETURN u {uid: u.uid,
+                                             email: u.email,
+                                             displayName: u.displayName, 
+                                             blocked: u.blocked}`
+            let session = driver.session()
+            return session.run(getUserCypher, {userId})
+            .then(response => {
+                session.close()
+                return unwrapResult(response)[0]
+            })
+        }
+    })
+}
+
+const setUserBlock = (userId, block) => {
+    if (typeof block !== 'boolean') return 'Block type must be a boolean'
+    return checkIfUserExists(userId)
+    .then(exists => {
+        if (exists) {
+            const blockCypher = `MATCH (u:User) 
+                                 WHERE u.uid=$userId
+                                 SET u.blocked=$block
+                                 RETURN u {id: ID(u),
+                                    email: u.email,
+                                    displayName: u.displayName, 
+                                    blocked: u.blocked}`
+            let session = driver.session()
+            return session.run(blockCypher, {userId, block})
+            .then(response => {
+                session.close()
+                return unwrapResult(response)[0]
+            })
+        }
+    })
+}
+
 module.exports = {
     createUser,
     checkIfUserExists,
-    isUserAdmin
+    isUserAdmin,
+    getUser,
+    setUserBlock
 }
