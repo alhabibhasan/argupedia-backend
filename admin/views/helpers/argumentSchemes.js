@@ -1,4 +1,4 @@
-const {firebase} = require('../firebase/firebase')
+const {firebase} = require('../../firebase/firebase')
 const database = firebase.database()
 
 const getSchemes = () => {

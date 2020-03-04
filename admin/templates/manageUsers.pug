@@ -1,0 +1,39 @@
+extends index.pug
+
+block content
+    style. 
+        .list-view {
+            margin: 3% 5% 0 3%;
+            max-height: 70vh;
+            overflow: scroll;
+        }
+        .label {
+            font-size: 15pt;
+        }
+        .cancel {
+            margin: 0 0 3% 3%;
+        }
+    h2.light.list-view
+            | Here are the current users in the system
+    div.list-view
+        div
+            table.table.table(style='width:100%')
+                tr
+                    th Email
+                    th Display name
+                    th Actions
+                each user in users
+                    tr
+                        td #{user.email}
+                        td #{user.displayName}
+                        td 
+                            #user
+                                if user.blocked
+                                    a.action.btn.btn-warning(href='/admin/dashboard/users/unblock/' + user.id) Unblock
+                                else
+                                    a.action.btn.btn-danger(href='/admin/dashboard/users/block/' + user.id) Block
+                
+
+    a.btn.btn-info.cancel(href='/admin/dashboard') Back
+
+    script.
