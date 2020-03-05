@@ -10,6 +10,8 @@ const {getUser, setUserBlock} = require('../../api/users/users')
 router.get('/', (req, res, next) => {
     getAllUsers()
     .then(users => {
+        // remove the current user from the list
+        users = users.filter(user => user.id !== req.user.uid)
         res.render(getTemplate('/templates/manageUsers.pug'), {users})
     })
 })
