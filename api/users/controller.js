@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const {createUser, checkIfUserExists } =  require('./users')
+const {createUser, getUser } =  require('./users')
 
 const {getArgsPostedByUser} = require('./postedContent')
 const {validateUid, validateEmail, validateDisplayName, validateRootOption} = require('./validation')
@@ -23,8 +23,13 @@ router.post('/create', [validateEmail, validateDisplayName, validateUid, validPa
 })
 
 router.post('/check', [validateUid, validParams], (req, res) => {
-    checkIfUserExists(req.body.uid).then(response => {
-        res.send({'userExists': response})
+    getUser(req.body.uid).then(user => {
+        if (user) {
+            res.send({
+                'userExists': Boolean(user),
+                'blocked': Boolean(user.blocked)
+             })
+        }
     })
     .catch(err => {
         res.statusCode = 400
