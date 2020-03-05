@@ -7,28 +7,24 @@ const {argumentExistsMiddleware} = require('../argExistsMiddleware')
 const {userCreatedPostMiddleware} = require('../../auth/userCreatedPost')
 const {jwtAuthMiddleware} = require('../../auth/jwtVerify')
 
+const createPostMiddlewares = [
+    validateId,  
+    validParams,
+    jwtAuthMiddleware, 
+    argumentExistsMiddleware,
+    userCreatedPostMiddleware]
+
 /**
  * This endpoint is used for 'root' arguments.
  */
-router.patch('/:id', [validateId, 
-                      validateArg, 
-                      validParams,
-                      jwtAuthMiddleware, 
-                      argumentExistsMiddleware,
-                      userCreatedPostMiddleware], (req, res) => {
+router.patch('/:id', [validateArg, ...createPostMiddlewares], (req, res) => {
     updateArgument(req, res)
 })
 
 /**
  * End point used to edit responses to arguments.
  */
-router.patch('/response/:id', [validateId, 
-                               validateArgResponse, 
-                               validParams, 
-                               argumentExistsMiddleware,
-                               jwtAuthMiddleware,
-                               userCreatedPostMiddleware ], 
-(req, res) => {
+router.patch('/response/:id', [validateArgResponse, ...createPostMiddlewares], (req, res) => {
     updateArgument(req, res)
 })
 

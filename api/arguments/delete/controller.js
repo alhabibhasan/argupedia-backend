@@ -7,11 +7,15 @@ const {argumentExistsMiddleware} = require('../argExistsMiddleware')
 const {userCreatedPostMiddleware} = require('../../auth/userCreatedPost')
 const {jwtAuthMiddleware} = require('../../auth/jwtVerify')
 
-router.delete('/:id', [validateId, 
-                       validParams, 
-                       argumentExistsMiddleware,
-                       jwtAuthMiddleware,
-                       userCreatedPostMiddleware], (req, res) => {
+const deleteMiddlewares = [
+    validateId, 
+    validParams, 
+    argumentExistsMiddleware,
+    jwtAuthMiddleware,
+    userCreatedPostMiddleware
+]
+
+router.delete('/:id', deleteMiddlewares, (req, res) => {
     deleteArg(req.params.id)
     .then(() => {
         res.send({

@@ -7,35 +7,30 @@ const {upvote, downvote, getVotes} = require('./votes')
 const {argumentExistsMiddleware} = require('../argExistsMiddleware')
 const {jwtAuthMiddleware} = require('../../auth/jwtVerify')
 
-router.post('/up/:id', [validateId,
-                        validateUid,
-                        validParams, 
-                        argumentExistsMiddleware, 
-                        jwtAuthMiddleware], 
-(req, res) => {
+const voteMiddlewares = [
+    validateId,
+    validateUid,
+    validParams, 
+    argumentExistsMiddleware, 
+    jwtAuthMiddleware
+]
+
+router.post('/up/:id', voteMiddlewares, (req, res) => {
         upvote(req.params.id, req.body.uid)
         .then(response => {
             res.send(response)
         })
 })
 
-router.post('/down/:id', [validateId, 
-                          validateUid,
-                          validParams, 
-                          argumentExistsMiddleware, 
-                          jwtAuthMiddleware], 
-(req, res) => {
+router.post('/down/:id', voteMiddlewares, (req, res) => {
     downvote(req.params.id, req.body.uid)
     .then(response => {
         res.send(response)
     })
 })
 
-router.post('/:id', [validateId, 
-                     validateOptionalUid,
-                     validParams, 
-                     argumentExistsMiddleware], 
-(req, res) => {
+router.post('/:id', [validateId, validateOptionalUid,
+                     validParams, argumentExistsMiddleware], (req, res) => {
     getVotes(req.params.id, req.body.uid)
     .then(response => {
         res.send(response)

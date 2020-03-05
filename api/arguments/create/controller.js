@@ -5,7 +5,12 @@ const validParams = require('../../util/validate-argument')
 const {validateArg ,validateArgResponse} = require('../validation')
 const {validateUid} = require('../../users/validation')
 
-router.post('/arg', [validateArg, validateUid ,validParams], (req, res, next) => {
+const createMiddlewares = [
+    validateUid,
+    validParams
+]
+
+router.post('/arg', [validateArg, ...createMiddlewares], (req, res, next) => {
     let createdNodeToReturn
     createArg(req.body)
     .then(createdNode => {
@@ -23,7 +28,7 @@ router.post('/arg', [validateArg, validateUid ,validParams], (req, res, next) =>
     })
 })
 
-router.post('/response/:id', [validateArgResponse, validateUid, validParams], (req, res, next) => {
+router.post('/response/:id', [validateArgResponse, ...createMiddlewares], (req, res, next) => {
     let createdNodeToReturn
     createArg(req.body)
     .then(createdNode => {
