@@ -1,7 +1,7 @@
-const {firebase} = require('./firebase')
+const auth = require('./firebase')
 
 const redirectIfLoggedOut = (req, res, next) => {
-    let user = firebase.auth().currentUser;
+    let user = auth.firebase.auth().currentUser;
     req.user = user
     if (user) {
         next()
@@ -11,7 +11,7 @@ const redirectIfLoggedOut = (req, res, next) => {
 }
 
 const checkLoggedIn = (req, res, next) => {
-    let user = firebase.auth().currentUser;
+    let user = auth.firebase.auth().currentUser;
     req.user = user
     next()
 }

@@ -4,9 +4,10 @@ const {getTemplate} = require('./util')
 const {firebase} = require('./firebase/firebase')
 const {check} = require('express-validator');
 const authErrorMessage = require('./firebase/authErrorMessages').errorMessages
-const {redirectIfLoggedOut, checkLoggedIn} = require('./firebase/authMiddleware')
+const authMiddle = require('./firebase/authMiddleware')
 const {isUserAdmin} = require('../api/users/users')
 const dashboard = require('./views/dashboard').router
+const validParams = require('../api/util/validate-argument')
 
 const validateCred = [
     check('email')
@@ -17,7 +18,7 @@ const validateCred = [
 
 router.use(express.urlencoded({ extended: true }))
 
-router.get('/login', [checkLoggedIn], (req, res) => {
+router.get('/login', [authMiddle.checkLoggedIn], (req, res) => {
     if (req.user) {
         res.render(getTemplate('/templates/dashboard.pug'), {user: req.user})
     } else {
@@ -25,11 +26,11 @@ router.get('/login', [checkLoggedIn], (req, res) => {
     }
 })
 
-router.get('/', [checkLoggedIn] ,(req, res) => {
+router.get('/', [authMiddle.checkLoggedIn] ,(req, res) => {
     res.render(getTemplate('/templates/index.pug', {user: req.user}))
 })
 
-router.post('/login', [validateCred] , (req, res) => {
+router.post('/login', [validateCred, validParams] , (req, res) => {
     let email = req.body.email
     let password = req.body.password
     firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE)
@@ -59,13 +60,13 @@ router.post('/login', [validateCred] , (req, res) => {
     })
 })
 
-router.get('/logout', [validateCred] , (req, res) => {
+router.get('/logout', (req, res) => {
     firebase.auth().signOut()
     .then(() => {
         res.redirect('/admin/')
     })
 })
 
-router.use('/dashboard', [redirectIfLoggedOut], dashboard)
+router.use('/dashboard', [authMiddle.redirectIfLoggedOut], dashboard)
 
 module.exports = router

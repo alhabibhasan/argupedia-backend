@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const {getTemplate} = require('../util')
 const {check} = require('express-validator');
-const {addScheme, getSchemes, getScheme, editScheme, deleteScheme} = require('./helpers/argumentSchemes')
+const schemesHelper = require('./helpers/argumentSchemes')
 
 const validParams = require('../../api/util/validate-argument')
 const validateInput = [
@@ -20,7 +20,7 @@ router.get('/add', (req, res, next) => {
 })
 
 router.get('/view', (req, res, next) => {
-    getSchemes()
+    schemesHelper.getSchemes()
     .then(response => {
         res.render(getTemplate('/templates/viewArgumentSchemes.pug'), { user: req.user, schemes: response})
     })
@@ -29,8 +29,9 @@ router.get('/view', (req, res, next) => {
 
 router.post('/add', [validateInput, validParams],(req, res, next) => {
     let scheme = JSON.parse(req.body.scheme)
+    console.log('jere')
     if (scheme.name.length && scheme.criticalQuestions.length) {
-        addScheme({
+        schemesHelper.addScheme({
             label: scheme.name, 
             criticalQuestions: scheme.criticalQuestions
         })
@@ -43,7 +44,7 @@ router.post('/add', [validateInput, validParams],(req, res, next) => {
 })
 
 router.get('/edit/:scheme', [validateInput, validParams],(req, res, next) => {
-    getScheme(req.params.scheme)
+    schemesHelper.getScheme(req.params.scheme)
     .then(scheme => {
         if (scheme) {
             let questions = scheme.criticalQuestions.map(q => {
@@ -70,7 +71,7 @@ router.post('/edit/:scheme', [validateInput, validParams],(req, res, next) => {
     if (!scheme.name || scheme.criticalQuestions.length === 0) {
         res.send('You need to supply all fields')
     } else {
-        editScheme(id, {
+        schemesHelper.editScheme(id, {
             label: scheme.name,
             criticalQuestions: scheme.criticalQuestions
         })
@@ -82,7 +83,7 @@ router.post('/edit/:scheme', [validateInput, validParams],(req, res, next) => {
 
 router.get('/delete/:scheme', [validateInput, validParams],(req, res, next) => {
     let id = req.params.scheme
-    getScheme(id)
+    schemesHelper.getScheme(id)
     .then(scheme => {
         if (scheme) {
             res.render(getTemplate('/templates/confirmDelete.pug'), {
@@ -98,7 +99,7 @@ router.get('/delete/:scheme', [validateInput, validParams],(req, res, next) => {
 
 router.get('/delete/confirm/:scheme', [validateInput, validParams],(req, res, next) => {
     let id = req.params.scheme
-    deleteScheme(id)
+    schemesHelper.deleteScheme(id)
     .then(resp => res.render(getTemplate('/templates/deleted.pug')))
 })
 
