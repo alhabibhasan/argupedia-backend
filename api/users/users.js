@@ -85,22 +85,18 @@ const isUserAdmin = (userId) => {
 }
 
 const getUser = (userId) => {
-    return checkIfUserExists(userId) // this does userID validation for us
-    .then(exists => {
-        if (exists) {
-            const getUserCypher = `MATCH (u:User) 
-                                   WHERE u.uid = $userId 
-                                   RETURN u {uid: u.uid,
-                                             email: u.email,
-                                             displayName: u.displayName, 
-                                             blocked: u.blocked}`
-            let session = driver.session()
-            return session.run(getUserCypher, {userId})
-            .then(response => {
-                session.close()
-                return unwrapResult(response)[0]
-            })
-        }
+    const getUserCypher = `MATCH (u:User) 
+                            WHERE u.uid = $userId 
+                            RETURN u {uid: u.uid,
+                                        email: u.email,
+                                        displayName: u.displayName, 
+                                        blocked: u.blocked}`
+    let session = driver.session()
+    return session.run(getUserCypher, {userId})
+    .then(response => {
+        session.close()
+        let user = unwrapResult(response)[0]
+        return user
     })
 }
 
