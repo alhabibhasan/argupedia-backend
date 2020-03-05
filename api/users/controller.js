@@ -34,7 +34,7 @@ router.post('/check', [validateUid, validParams], (req, res) => {
     })
 })
 
-router.get('/posts', [jwtAuthMiddleware, validParams], (req, res) => {
+router.get('/posts', [jwtAuthMiddleware], (req, res) => {
     getArgsPostedByUser(req.body['validated_uid'], true) // get roots
     .then(rootPosts => {
         return getArgsPostedByUser(req.body['validated_uid'], false) // get non roots

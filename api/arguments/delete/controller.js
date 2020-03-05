@@ -6,12 +6,14 @@ const {deleteArg} = require('./deleteArg')
 const {argumentExistsMiddleware} = require('../argExistsMiddleware')
 const {userCreatedPostMiddleware} = require('../../auth/userCreatedPost')
 const {jwtAuthMiddleware} = require('../../auth/jwtVerify')
+const {userBlockedMiddleware} = require('../../auth/userBlocked')
 
 const deleteMiddlewares = [
     validateId, 
     validParams, 
-    argumentExistsMiddleware,
     jwtAuthMiddleware,
+    userBlockedMiddleware,
+    argumentExistsMiddleware,
     userCreatedPostMiddleware
 ]
 

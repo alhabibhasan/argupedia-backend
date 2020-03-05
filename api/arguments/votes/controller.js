@@ -6,13 +6,15 @@ const {validateUid, validateOptionalUid} = require('../../users/validation')
 const {upvote, downvote, getVotes} = require('./votes')
 const {argumentExistsMiddleware} = require('../argExistsMiddleware')
 const {jwtAuthMiddleware} = require('../../auth/jwtVerify')
+const {userBlockedMiddleware} = require('../../auth/userBlocked')
 
 const voteMiddlewares = [
     validateId,
     validateUid,
     validParams, 
     argumentExistsMiddleware, 
-    jwtAuthMiddleware
+    jwtAuthMiddleware,
+    // userBlockedMiddleware
 ]
 
 router.post('/up/:id', voteMiddlewares, (req, res) => {
