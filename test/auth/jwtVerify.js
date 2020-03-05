@@ -12,7 +12,6 @@ describe('JWT Token Verification', () =>{
             let response = httpMocks.createResponse();
 
             jwtAuthMiddleware(request, response)
-            console.log(response)
             done()
         })
     })
