@@ -14,7 +14,7 @@ const voteMiddlewares = [
     validParams, 
     argumentExistsMiddleware, 
     jwtAuthMiddleware,
-    // userBlockedMiddleware
+    userBlockedMiddleware
 ]
 
 router.post('/up/:id', voteMiddlewares, (req, res) => {
