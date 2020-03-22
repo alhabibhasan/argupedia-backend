@@ -29,7 +29,6 @@ router.get('/view', (req, res, next) => {
 
 router.post('/add', [validateInput, validParams],(req, res, next) => {
     let scheme = JSON.parse(req.body.scheme)
-    console.log('jere')
     if (scheme.name.length && scheme.criticalQuestions.length) {
         schemesHelper.addScheme({
             label: scheme.name, 
