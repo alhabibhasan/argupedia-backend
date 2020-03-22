@@ -22,7 +22,6 @@ const getRootArgChain = (rootId) => {
 
     const relationshipsCypher = `MATCH p=(rootArg:Argument)<-[*]-(otherNode) 
                     WHERE ID(rootArg) = toInteger($rootId)
-                    AND otherNode.deleted <> true
                     RETURN rootArg{.*, id: ID(rootArg), type:labels(rootArg)[0]}, 
                            RELATIONSHIPS(p) AS relationship, 
                            otherNode {.*, id: ID(otherNode), type:labels(otherNode)[0]}`
