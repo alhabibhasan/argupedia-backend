@@ -29,10 +29,12 @@ router.get('/view', (req, res, next) => {
 
 router.post('/add', [validateInput, validParams],(req, res, next) => {
     let scheme = JSON.parse(req.body.scheme)
+    console.log(scheme)
     if (scheme.name.length && scheme.criticalQuestions.length) {
         schemesHelper.addScheme({
             label: scheme.name, 
-            criticalQuestions: scheme.criticalQuestions
+            criticalQuestions: scheme.criticalQuestions,
+            schemeFields: scheme.schemeFields
         })
         .then(() => {
             res.render(getTemplate('/templates/addArgumentSchemes.pug'), {message: 'Scheme has been added'})
@@ -51,9 +53,16 @@ router.get('/edit/:scheme', [validateInput, validParams],(req, res, next) => {
                     question: q
                 }
             })
+            console.log(scheme)
+            let fields = scheme.schemeFields.map(f => {
+                return {
+                    field: f
+                }
+            })
             res.render(getTemplate('/templates/addArgumentSchemes.pug'), {
                 label: scheme.label, 
                 cqs: questions,
+                schemeFields: fields,
                 edit: true,
                 route: '/admin/dashboard/schemes/edit/' + req.params.scheme
             })
@@ -72,7 +81,8 @@ router.post('/edit/:scheme', [validateInput, validParams],(req, res, next) => {
     } else {
         schemesHelper.editScheme(id, {
             label: scheme.name,
-            criticalQuestions: scheme.criticalQuestions
+            criticalQuestions: scheme.criticalQuestions,
+            schemeFields: scheme.schemeFields
         })
         .then(() => {
             res.render(getTemplate('/templates/updated.pug'))

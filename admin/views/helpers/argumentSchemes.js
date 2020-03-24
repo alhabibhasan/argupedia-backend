@@ -25,7 +25,8 @@ const addScheme = (scheme) => {
     var newSchemeKey = fb.database().ref().child('scheme').push().key;
     return fb.database().ref('/schemes/' + newSchemeKey).set({
         label: scheme.label,
-        criticalQuestions: scheme.criticalQuestions
+        criticalQuestions: scheme.criticalQuestions,
+        schemeFields: scheme.schemeFields,
     })
 }
 
