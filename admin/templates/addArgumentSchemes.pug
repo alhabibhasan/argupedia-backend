@@ -2,6 +2,9 @@ extends index.pug
 
 block content
     style. 
+        body {
+            overflow-y: scroll;
+        }
         .addScheme {
             margin-left: 5%;
             margin-top: -10%;
@@ -66,12 +69,18 @@ block content
             let formSubmitUrl = "#{route}"
             let EXISTING_LABEL = "#{label}"
             let EXISTING_CQS = []
+            let EXISTING_FIELDS = []
         #label
         if label
             each question in cqs
                 script. 
                     currentQ = "#{question.question}"
                     EXISTING_CQS.push(currentQ)
+
+            each f in schemeFields
+                script.
+                    currentFields = "#{f.field}"
+                    EXISTING_FIELDS.push(currentFields)
     p.form.input-fields.light #{message}
     div.form
         form(method='POST' id='form')
@@ -81,12 +90,17 @@ block content
                     label.input-label Name:
                     input.form-control.input-fields(type='text' placeholder='What is the scheme called?' name='name' id='schemeName' required='true')
                 p
+                    label.input-label Scheme field:
+                    input.form-control.input-fields(type='text' placeholder='Give an argument scheme field' id='schemeField' name='schemeField')
+                    button.btn.btn-secondary.add-to-list(type='button' id='addSchemeField') Add scheme field
+                    ul.list.list-group(id='schemeFieldList') 
+                p
                     label.input-label Critical question:
                     input.form-control.input-fields(type='text' placeholder='What is the critical question?' id='criticalQ' name='name')
                     button.btn.btn-secondary.add-to-list(type='button' id='addCriticalQ') Add question 
                 p
                     input(type='hidden' id='scheme' name='scheme')
-
+                
                 ul.list.list-group(id='criticalQList')
 
                 #edit
@@ -103,8 +117,8 @@ block content
         let form = window.document.getElementById('form')
         form.action = formSubmitUrl
 
-        let addValToList = (val) => {
-            let criticalQList = window.document.getElementById('criticalQList')
+        let addValToList = (list, val) => {
+            let listElem = window.document.getElementById(list)
             let li = document.createElement("li");
             let span = document.createElement("span")
             let div = document.createElement("div")
@@ -114,7 +128,7 @@ block content
             removeButton.innerHTML = '&#10005;'
             removeButton.classList.add('btn','btn-danger', 'delete-button') 
             removeButton.type = 'button'
-            removeButton.qIndex = criticalQList.children.length
+            removeButton.qIndex = listElem.children.length
             removeButton.onclick = (e) => {
                 // we are in a div and then an li
                 e.target.parentNode.parentNode.remove()
@@ -124,22 +138,31 @@ block content
             div.appendChild(span)
             div.appendChild(removeButton)
             li.appendChild(div)
-            criticalQList.appendChild(li)
+            listElem.appendChild(li)
         }
 
 
-        if (EXISTING_LABEL && EXISTING_CQS) {
+        if (EXISTING_LABEL && EXISTING_CQS && EXISTING_FIELDS) {
             let schemeName = window.document.getElementById('schemeName')
             schemeName.value = EXISTING_LABEL
-            EXISTING_CQS.forEach(q => addValToList(q))
+            EXISTING_CQS.forEach(q => addValToList('criticalQList', q))
+            EXISTING_FIELDS.forEach(q => addValToList('schemeFieldList', q))
         }
         
         let addQButton = window.document.getElementById('addCriticalQ')
         addQButton.addEventListener('click' , (e) => {
             let criticalQ = window.document.getElementById('criticalQ')
             if (criticalQ.value.length > 0) {
-                addValToList(criticalQ.value)
+                addValToList('criticalQList', criticalQ.value)
                 criticalQ.value = ''
+            }
+        })
+        let addFieldButton = window.document.getElementById('addSchemeField')
+        addFieldButton.addEventListener('click' , (e) => {
+            let schemeField = window.document.getElementById('schemeField')
+            if (schemeField.value.length > 0) {
+                addValToList('schemeFieldList', schemeField.value)
+                schemeField.value = ''
             }
         })
 
@@ -147,24 +170,34 @@ block content
         submitButton.addEventListener('click' , (e) => {
             
             let name = window.document.getElementById('schemeName')
-            let list = window.document.getElementById('criticalQList')
-            let questions = getQuestions(list)
+            let criticalQList = window.document.getElementById('criticalQList')
+            let schemeFieldList = window.document.getElementById('schemeFieldList')
+            let questions = getListValues(criticalQList)
+            let schemeFields = getListValues(schemeFieldList)
 
             if (questions.length === 0) {
                 e.preventDefault()
                 showMessage('Please supply some critical questions')
-            } else {
-                showMessage('')
-                let scheme = {
-                    name: name.value,
-                    criticalQuestions: getQuestions(list)
-                }
-                let hiddenField = window.document.getElementById('scheme')
-                hiddenField.value = JSON.stringify(scheme)
+                return;
+            }  
+
+            if (schemeFields.length === 0) {
+                e.preventDefault()
+                showMessage('Please supply some scheme fields')
+                return;
+            } 
+            
+            showMessage('')
+            let scheme = {
+                name: name.value,
+                criticalQuestions: questions,
+                schemeFields: schemeFields
             }
+            let hiddenField = window.document.getElementById('scheme')
+            hiddenField.value = JSON.stringify(scheme)
         })
 
-        let getQuestions = (list) => {
+        let getListValues = (list) => {
             let spans =list.querySelectorAll('span')
             let arr = []
             for (let i = 0; i < spans.length; i++) {
