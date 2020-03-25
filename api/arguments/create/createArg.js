@@ -3,19 +3,9 @@ const neo4j = require('neo4j-driver').v1
 const {formLink , unwrapResult} = require('../read/util/argHelpers')
 
 const driver = neo4j.driver(process.env.NEO_HOST, neo4j.auth.basic(process.env.NEO_USERNAME, process.env.NEO_PASS))
+const EXLUDED_PROPS = ['validated_uid', 'uid']
 
 const createArg = (arg) => {
-    let { statement, 
-        circumstance, 
-        action, 
-        newCircumstance, 
-        goal, 
-        value, 
-        root, 
-        argumentBasis,
-        sourceList,
-        parentId,
-        uid } = arg
     
     if (root) { 
         parentId = -1
@@ -24,19 +14,12 @@ const createArg = (arg) => {
     let createdAt = new Date().toString(),
         updatedAt = new Date().toString()
     let deleted = false
+    let uid = arg.validated_uid
+    let argCypher = getCypherFromArg(arg)
 
     const cypher = `CREATE 
-                    (arg:Argument {
-                        statement: $statement,
-                        circumstance: $circumstance,
-                        action: $action,
-                        newCircumstance: $newCircumstance,
-                        goal: $goal,
-                        value: $value,
-                        root: $root,
-                        parentId: $parentId,
-                        argumentBasis: $argumentBasis,
-                        sourceList: $sourceList,
+                    (arg:Argument {`
+                        + argCypher + `
                         createdAt: $createdAt,
                         updatedAt: $updatedAt,
                         deleted: $deleted,
@@ -44,22 +27,7 @@ const createArg = (arg) => {
                     })
                     RETURN arg`
     const session = driver.session()
-    return session.run(cypher, {
-        statement,
-        circumstance,
-        action,
-        newCircumstance,
-        goal,
-        value,
-        argumentBasis,
-        root,
-        parentId,
-        sourceList,
-        createdAt,
-        updatedAt,
-        deleted,
-        uid
-    })
+    return session.run(cypher, {...arg, createdAt, updatedAt, deleted, uid})
     .then(data => {
         session.close()
         let node = unwrapResult(data)[0]
@@ -100,6 +68,18 @@ const isInt = (value) => {
     return !isNaN(value) && 
             parseInt(Number(value)) == value && 
             !isNaN(parseInt(value, 10))
+}
+
+const getCypherFromArg = (arg) => {
+    let keys = Object.keys(arg)
+    let cypher = ''
+    for (let i = 0; i < keys.length; i++) {
+        let santiziedKey = keys[i]
+        if (!EXLUDED_PROPS.includes(santiziedKey)) {
+            cypher += santiziedKey + ': $' + santiziedKey + ',' + '\n'
+        }
+    }
+    return cypher
 }
 
 
