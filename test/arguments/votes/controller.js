@@ -24,7 +24,7 @@ let testArg = {
     "newCircumstance": "This is a test new circumstance",
     "goal": "This is a test goal",
     "value": "This is a test value",
-    "sourceList": "['www.this-is-a-test-extra-resource.com',]",
+    "sourceList": ['www.this-is-a-test-extra-resource.com',],
     "root": true,
     "uid": "pO2rZ7n0cAN26uJOLZPam0GrGCk2",
 }

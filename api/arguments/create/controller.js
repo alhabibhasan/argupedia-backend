@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const {createArg, respondToArg} = require('./createArg')
 const validParams = require('../../util/validate-argument')
-const {validateArg ,validateArgResponse, validateAllFieldsPresent} = require('../validation')
+const {validateArgResponse, validateAllFieldsPresent} = require('../validation')
 const {validateUid} = require('../../users/validation')
 const {jwtAuthMiddleware} = require('../../auth/jwtVerify')
 const {userBlockedMiddleware} = require('../../auth/userBlocked')
@@ -15,7 +15,7 @@ const createMiddlewares = [
     userBlockedMiddleware
 ]
 
-router.post('/arg', [validateArg, ...createMiddlewares], (req, res, next) => {
+router.post('/arg', [...createMiddlewares], (req, res, next) => {
     let createdNodeToReturn
     createArg(req.body)
     .then(createdNode => {

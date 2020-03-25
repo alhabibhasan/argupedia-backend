@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const validParams = require('../../util/validate-argument')
-const {validateArg, validateArgResponse, validateId} = require('../validation')
+const {validateAllFieldsPresent, validateArgResponse, validateId} = require('../validation')
 const {updateArg} = require('./updateArg')
 const {argumentExistsMiddleware} = require('../argExistsMiddleware')
 const {userCreatedPostMiddleware} = require('../../auth/userCreatedPost')
@@ -9,6 +9,7 @@ const {jwtAuthMiddleware} = require('../../auth/jwtVerify')
 const {userBlockedMiddleware} = require('../../auth/userBlocked')
 
 const createPostMiddlewares = [
+    validateAllFieldsPresent,
     validateId,  
     validParams,
     jwtAuthMiddleware,
@@ -19,7 +20,7 @@ const createPostMiddlewares = [
 /**
  * This endpoint is used for 'root' arguments.
  */
-router.patch('/:id', [validateArg, ...createPostMiddlewares], (req, res) => {
+router.patch('/:id', [...createPostMiddlewares], (req, res) => {
     updateArgument(req, res)
 })
 

@@ -26,7 +26,7 @@ let testArg = {
     newCircumstance: 'This is a test new circumstance',
     goal: 'This is a test goal',
     value: 'This is a test value',
-    sourceList: '["www.this-is-a-test-extra-resource.com"]',
+    sourceList: ["www.this-is-a-test-extra-resource.com"],
     root: true,
     uid: 'pO2rZ7n0cAN26uJOLZPam0GrGCk2',
 }
@@ -75,11 +75,17 @@ describe('Arguments', () => {
                     
                     res.body.createdNode.should.not.equal(null)
 
-                    let createdObjectValues = Object.values(res.body.createdNode)
-                    let sendObjectValues = Object.values(testArg).sort()
-                    let intersection = _.intersection(createdObjectValues, sendObjectValues).sort()
-                    
-                    JSON.stringify(intersection).should.equal(JSON.stringify(sendObjectValues))
+                    let createdObjectValues = Object.keys(res.body.createdNode)
+                    let sendObjectValues = Object.keys(testArg)
+
+                    sendObjectValues.forEach(value => {
+                        if (value === 'uid') {
+                            assert.equal(createdObjectValues.includes('creatorUID'), true)
+                        } else {
+                            assert.equal(createdObjectValues.includes(value), true)
+                        }
+
+                    })
                     
                     done();
               });
@@ -131,7 +137,11 @@ describe('Arguments', () => {
 
           argFields.forEach((field, index) => {
                 let testArgMissingValues = JSON.parse(JSON.stringify(testArg))
-                testArgMissingValues[field] = ''
+                if (field === 'sourceList') {
+                    testArgMissingValues[field] = []
+                } else {
+                    testArgMissingValues[field] = ''
+                }
                 it('should successfully detect missing fields for a new argument: ' + field + '#'+ parseInt(index + 1), (done) => {
                     chai.request(server)
                         .post('/api/arg/create/arg')
