@@ -1,4 +1,7 @@
 const {check} = require('express-validator');
+const {camelCaseToSentenceCase} = require('../util/formatting')
+
+const OPTIONAL_FIELDS = ['sourceList']
 
 const validateArg = [
     check('statement')
@@ -9,6 +12,39 @@ const validateArg = [
         .isLength({min: 5}).withMessage('Argument basis must be greater than 5 characters'),
     check('root').isIn(['true', 'false'])
 ]
+
+const validateAllFieldsPresent = (req, res, next) => {
+    let validationResults = {
+        isValid: true,
+        msg: 'Form is valid'
+    }
+    let requestData = req.body
+    let requestKeys = Object.keys(req.body)
+    if (!requestKeys || !requestKeys.length) {
+        validationResults.isValid = false
+        validationResults.msg = 'Validation failed: Request body is empty'
+        _sendValidationResults(422, validationResults, res)
+        return
+    }
+   
+    for (let objectProperty in requestData) {
+        if (OPTIONAL_FIELDS.indexOf(objectProperty)) {
+            if (!requestData[objectProperty] || !Boolean(requestData[objectProperty])) {
+                validationResults.isValid = false
+                validationResults.msg = 'You are missing the ' + camelCaseToSentenceCase(objectProperty) + ' field.'
+                _sendValidationResults(422, validationResults, res)
+                return;
+            }
+        }
+    }
+
+    next()
+}
+
+const _sendValidationResults = (status, data, res) => {
+    res.status(status)
+    res.send(data)
+}
 
 const validateArgResponse = [
     check('parentId')
@@ -29,6 +65,7 @@ const validateId = [
 ]
 
 module.exports = {
+    validateAllFieldsPresent,
     validateArg,
     validateArgResponse,
     validateId

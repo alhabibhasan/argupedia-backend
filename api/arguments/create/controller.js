@@ -2,12 +2,13 @@ const express = require('express')
 const router = express.Router()
 const {createArg, respondToArg} = require('./createArg')
 const validParams = require('../../util/validate-argument')
-const {validateArg ,validateArgResponse} = require('../validation')
+const {validateArg ,validateArgResponse, validateAllFieldsPresent} = require('../validation')
 const {validateUid} = require('../../users/validation')
 const {jwtAuthMiddleware} = require('../../auth/jwtVerify')
 const {userBlockedMiddleware} = require('../../auth/userBlocked')
 
 const createMiddlewares = [
+    validateAllFieldsPresent,
     validateUid,
     validParams,
     jwtAuthMiddleware,
