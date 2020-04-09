@@ -8,6 +8,8 @@
 
 ## Firebase set up
 
+If you've already set up the firebase instance by following the steps from the README of the front end app, then you can skip these set up steps for Firebase auth and DB set up, as we only need the one instance of firebase. This means that you can use the same credentials for the front end and back end app.
+
 You will need to set up and connect to your own instance of firebase. Steps to do this can be found here: https://firebase.google.com/
 
 You will need to add the credentials into the ```admin/firebase/auth/firebase.js``` file.
