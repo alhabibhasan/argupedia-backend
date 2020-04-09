@@ -1,4 +1,4 @@
-# Argupedia front end
+# Argupedia back end
 
 ## Set up, install and run
 
