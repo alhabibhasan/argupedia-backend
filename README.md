@@ -38,7 +38,7 @@ https://neo4j.com/docs/operations-manual/current/installation/
 
 Once you have install Neo4j onto your machine, you will need to create a new graph instance. This can be done via the Neo4j Desktop browser.
 
-After you do this, please update the ```.env``` with the specific details of your database graph.
+After you do this, please update/create the ```.env``` with the specific details of your database graph. The ```.env``` file must be placed in the root directory of the project.
 
 This will allow Argupedia to connect to the database.
 
@@ -48,7 +48,7 @@ Argupedia will handle the structure of the data within the graph itself.
 
 In order to run tests, you will need to ensure that you have set up a separate test database graph. You can do this by repeating the steps from the previous step and setting the values within the ```.env.test```.
 
-Once you have created database graph and have updated the ```.env.test``` file, close all active instances of the app. Then run:
+Once you have created database graph and have updated/created the ```.env.test``` file (also in the root directory), close all active instances of the app. Then run:
 
 ```npm test```
 
