@@ -1,6 +1,6 @@
 # Arguepedia front end
 
-## Set up and install
+## Set up, install and run
 
 `git clone https://github.com/alhabibhasan/argupedia-backend.git`
 
